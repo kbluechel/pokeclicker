@@ -27,6 +27,10 @@ class Battle {
      * Attacks with Pokémon and checks if the enemy is defeated.
      */
     public static pokemonAttack() {
+        // Pkmn attacks disabled and we already beat the starter
+        if (App.game.challenges.list.disablePokemonAttack.active() && player.starter() != GameConstants.Starter.None) {
+            return;
+        }
         // TODO: figure out a better way of handling this
         // Limit pokemon attack speed, Only allow 1 attack per 900ms
         const now = Date.now();
