@@ -10,12 +10,19 @@
             <h2 class="pageItemTitle">
               <knockout data-bind="text: player.town().name">Town Name</knockout>
 
-              <knockout class="left" data-bind="visible: player.town() instanceof DungeonTown">
+              <knockout class="left" data-bind="if: player.town() instanceof DungeonTown">
                   <knockout data-bind="using: App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(player.town().dungeon.name)]()">
                       <knockout data-bind="text: $data.toLocaleString('en-US')">0</knockout>
                       &nbsp;clears
                   </knockout>
               </knockout>
+
+              <knockout class="left" data-bind="if: player.town().gym">
+                <knockout data-bind="using: App.game.statistics.gymsDefeated[GameConstants.getGymIndex(player.town().gym.town)]()">
+                    <knockout data-bind="text: $data.toLocaleString('en-US')">0</knockout>
+                    &nbsp;clears
+                </knockout>
+            </knockout>
 
               <knockout data-bind="if: player.town() instanceof DungeonTown && player.town().dungeon">
                   <!--If all Pokémon in the dungeon are caught-->
