@@ -8,7 +8,9 @@ A game about catching Pokémon, defeating gym leaders, and watching numbers get 
 
 NOTE: PokéClicker is still in development!
 
-You can try out the current state at https://www.pokeclicker.com/
+This is a unofficial version of the pokeclicker fangame for me to improve my coding skills and have some fun with
+
+You can try out the current state of the original pokeclicker at https://www.pokeclicker.com/
 
 You can reach out on discord to discuss your ideas and how to implement them: https://discord.gg/a6DFe4p
 
