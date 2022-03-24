@@ -9,6 +9,8 @@ class GymRunner {
     public static running: KnockoutObservable<boolean> = ko.observable(false);
     public static autoRestart: KnockoutObservable<boolean> = ko.observable(false);
     public static initialRun = true;
+    public static freeRebattle = false;
+    public static rebattleRewards = false;
 
     public static startGym(
         gym: Gym,
@@ -101,11 +103,24 @@ class GymRunner {
                 gym.firstWinReward();
             }
             GameHelper.incrementObservable(App.game.statistics.gymsDefeated[GameConstants.getGymIndex(gym.town)]);
+            //make the rebattle free after 1000 wins in the gym
+            if (!this.freeRebattle && App.game.statistics.gymsDefeated[GameConstants.getGymIndex(gym.town)]() > 1000) {
+                this.freeRebattle = true;
+            }
+            //make the rebattle function reward money after 10k wins
+            if (!this.rebattleRewards && App.game.statistics.gymsDefeated[GameConstants.getGymIndex(gym.town)]() > 10000) {
+                this.rebattleRewards = true;
+            }
+
+            // Award money for defeating gym
+            if (!this.autoRestart() || this.rebattleRewards) {
+                App.game.wallet.gainMoney(gym.moneyReward);
+            }
 
             // Auto restart gym battle
             if (this.autoRestart()) {
                 const cost = (this.gymObservable().moneyReward || 10) * 2;
-                const amt = new Amount(cost, GameConstants.Currency.money);
+                const amt = new Amount(this.freeRebattle ? 0 : cost, GameConstants.Currency.money);
                 // If the player can afford it, restart the gym
                 if (App.game.wallet.loseAmount(amt)) {
                     this.startGym(this.gymObservable(), this.autoRestart(), false);
@@ -113,8 +128,6 @@ class GymRunner {
                 }
             }
 
-            // Award money for defeating gym
-            App.game.wallet.gainMoney(gym.moneyReward);
             // Send the player back to the town they were in
             player.town(TownList[gym.town]);
             App.game.gameState = GameConstants.GameState.town;
