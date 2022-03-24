@@ -168,6 +168,35 @@ class Battle {
         if (Rand.chance(p)) {
             App.game.farming.gainRandomBerry();
         }
+        if (App.game.statistics.routeKills[player.region][Battle.route]() > 10000) {
+            if (Rand.chance(p)) {
+                const r = Rand.intBetween(0, 5);
+                let egg = '';
+                switch (r) {
+                    case 0:
+                        egg = 'Fire_egg';
+                        break;
+                    case 1:
+                        egg = 'Water_egg';
+                        break;
+                    case 2:
+                        egg = 'Grass_egg';
+                        break;
+                    case 3:
+                        egg = 'Fighting_egg';
+                        break;
+                    case 4:
+                        egg = 'Electric_egg';
+                        break;
+                    case 5:
+                        egg = 'Dragon_egg';
+                        break;
+                    default:
+                        break;
+                }
+                player.gainItem(ItemList[egg].name, 1);
+            }
+        }
     }
 
 }

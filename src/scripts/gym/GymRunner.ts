@@ -35,11 +35,6 @@ class GymRunner {
             GymBattle.generateNewEnemy();
             App.game.gameState = GameConstants.GameState.gym;
             this.running(true);
-            this.resetGif();
-
-            setTimeout(() => {
-                this.hideGif();
-            }, GameConstants.GYM_COUNTDOWN);
 
         } else {
             const reqsList = [];
@@ -52,19 +47,6 @@ class GymRunner {
                 message: `You don't have access to ${gym.leaderName}s Gym yet.<br/>${reqsList.join('<br/>')}`,
                 type: NotificationConstants.NotificationOption.warning,
             });
-        }
-    }
-
-    private static hideGif() {
-        $('#gymCountdown').hide();
-    }
-
-    public static resetGif() {
-        if (!this.autoRestart() || this.initialRun) {
-            $('#gymCountdown').show();
-            setTimeout(() => {
-                $('#gymGo').attr('src', 'assets/gifs/go.gif');
-            }, 0);
         }
     }
 
@@ -120,9 +102,12 @@ class GymRunner {
             // Auto restart gym battle
             if (this.autoRestart()) {
                 const cost = (this.gymObservable().moneyReward || 10) * 2;
-                const amt = new Amount(this.freeRebattle ? 0 : cost, GameConstants.Currency.money);
+                const amt = new Amount(cost, GameConstants.Currency.money);
                 // If the player can afford it, restart the gym
-                if (App.game.wallet.loseAmount(amt)) {
+                if (!this.freeRebattle && App.game.wallet.loseAmount(amt)) {
+                    this.startGym(this.gymObservable(), this.autoRestart(), false);
+                    return;
+                } else if (this.freeRebattle) {
                     this.startGym(this.gymObservable(), this.autoRestart(), false);
                     return;
                 }
