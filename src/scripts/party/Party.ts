@@ -180,12 +180,14 @@ class Party implements Feature {
     calculateClickAttack(useItem = false): number {
         // Base power
         // Shiny pokemon help with a 50% boost
-        // Activating the "No pkmn attack" challenge will double the click attack
-        const clickAttack = Math.pow(this.caughtPokemon.length + (this.caughtPokemon.filter(p => p.shiny).length / 2) + 1, 1.4) * (1 + AchievementHandler.achievementBonus());
+        // Activating the "No pkmn attack" challenge will double the click attack and increase the shiny boost to 100%
+        const clickChallenge = App.game.challenges.list.disablePokemonAttack.active();
+        const shinyMultiDivider = clickChallenge ? 1 : 2;
+        const clickAttack = Math.pow(this.caughtPokemon.length + (this.caughtPokemon.filter(p => p.shiny).length / shinyMultiDivider) + 1, 1.4) * (1 + AchievementHandler.achievementBonus());
 
         const bonus = this.multiplier.getBonus('clickAttack', useItem);
 
-        const challengeBonus = App.game.challenges.list.disablePokemonAttack.active() ? 2 : 1;
+        const challengeBonus = clickChallenge ? 2 : 1;
 
         return Math.floor(clickAttack * bonus * challengeBonus);
     }
