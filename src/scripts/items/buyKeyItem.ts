@@ -32,3 +32,4 @@ class BuyKeyItem extends Item {
 
 ItemList['Dungeon_ticket'] = new BuyKeyItem(KeyItems.KeyItem.Dungeon_ticket, 100, undefined, undefined, 'Dungeon Ticket');
 ItemList['Explorer_kit']   = new BuyKeyItem(KeyItems.KeyItem.Explorer_kit, 5000, undefined, undefined, 'Explorer Kit');
+ItemList['Auto_clicker']   = new BuyKeyItem(KeyItems.KeyItem.Auto_clicker, 20000, undefined, undefined, 'Auto Clicker');

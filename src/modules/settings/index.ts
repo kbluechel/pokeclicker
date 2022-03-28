@@ -61,6 +61,7 @@ Settings.add(new BooleanSetting('resetShopAmountOnPurchase', 'Reset buy quantity
 Settings.add(new BooleanSetting('showCurrencyGainedAnimation', 'Show currency gained animation', true));
 Settings.add(new BooleanSetting('hideChallengeRelatedModules', 'Hide challenge related modules', false));
 Settings.add(new BooleanSetting('autoBomb', 'Use bomb when underground energy is full', false));
+Settings.add(new BooleanSetting('enableAutoClicker', 'Enable auto clicker', false));
 Settings.add(new Setting<string>('backgroundImage', 'Background image:',
     [
         new SettingOption('Day', 'background-day'),

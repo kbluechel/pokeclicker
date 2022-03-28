@@ -22,6 +22,9 @@ class Battle {
     public static tick() {
         this.counter = 0;
         this.pokemonAttack();
+        if (Settings.getSetting('enableAutoClicker').value) {
+            this.clickAttack();
+        }
     }
 
     /**
@@ -32,7 +35,7 @@ class Battle {
         if (App.game.challenges.list.disablePokemonAttack.active() && App.game.gameState != GameConstants.GameState.battleFrontier) {
             return;
         }
-
+        //#region Attack timer fix
         /**
          * possible change to the current attack restrictor
          * works on routes but not when
@@ -48,9 +51,10 @@ class Battle {
             }, 900);
         }
         */
+        //#endregion
+
         // TODO: figure out a better way of handling this
         // Limit pokemon attack speed, Only allow 1 attack per 900ms
-
         const now = Date.now();
         if (this.lastPokemonAttack > now - 900) {
             return;

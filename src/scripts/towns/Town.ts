@@ -143,6 +143,7 @@ const ViridianCityShop = new TownShop([
     ItemList['xAttack'],
     ItemList['xClick'],
     ItemList['Dungeon_ticket'],
+    ItemList['Auto_clicker'],
 ]);
 const LavenderTownShop = new TownShop([
     ItemList['Greatball'],

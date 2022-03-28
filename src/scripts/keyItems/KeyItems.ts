@@ -90,6 +90,7 @@ class KeyItems implements Feature {
             new KeyItem(KeyItems.KeyItem.DNA_splicers, 'A splicer that fuses certain Pokémon', () => {
                 return App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex('Giant Chasm')]() > 0;
             }, undefined, undefined, 'DNA Splicers'),
+            new KeyItem(KeyItems.KeyItem.Auto_clicker, 'Enables the auto-clicker setting', null, false, undefined, 'Auto Clicker'),
         ];
     }
 
@@ -162,6 +163,7 @@ namespace KeyItems {
         'Explorer_kit',
         'Event_calendar',
         'Shard_case',
-        'DNA_splicers'
+        'DNA_splicers',
+        'Auto_clicker'
     }
 }
