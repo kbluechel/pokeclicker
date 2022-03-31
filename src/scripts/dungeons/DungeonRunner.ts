@@ -126,7 +126,7 @@ class DungeonRunner {
             Notifier.notify({
                 message: `Found ${amount} × ${GameConstants.humanifyString(input)} Berry in a dungeon chest`,
                 type: NotificationConstants.NotificationOption.success,
-                setting: NotificationConstants.NotificationSetting.dungeon_item_found,
+                setting: NotificationConstants.NotificationSetting.Items.dungeon_item_found,
             });
 
             return App.game.farming.gainBerry(BerryType[GameConstants.humanifyString(input)], amount, false);
@@ -135,7 +135,7 @@ class DungeonRunner {
             Notifier.notify({
                 message: `Found ${amount} × ${GameConstants.humanifyString(input)} in a dungeon chest`,
                 type: NotificationConstants.NotificationOption.success,
-                setting: NotificationConstants.NotificationSetting.dungeon_item_found,
+                setting: NotificationConstants.NotificationSetting.Items.dungeon_item_found,
             });
 
             return App.game.pokeballs.gainPokeballs(GameConstants.Pokeball[GameConstants.humanifyString(input)],amount, false);
@@ -144,7 +144,7 @@ class DungeonRunner {
             Notifier.notify({
                 message: `Found ${amount} × ${GameConstants.humanifyString(input)} in a dungeon chest`,
                 type: NotificationConstants.NotificationOption.success,
-                setting: NotificationConstants.NotificationSetting.dungeon_item_found,
+                setting: NotificationConstants.NotificationSetting.Items.dungeon_item_found,
             });
 
             return Underground.gainMineItem(Underground.getMineItemByName(input).id, amount);
@@ -153,7 +153,7 @@ class DungeonRunner {
             Notifier.notify({
                 message: `Found ${1} × ${GameConstants.humanifyString(input)} in a dungeon chest`,
                 type: NotificationConstants.NotificationOption.success,
-                setting: NotificationConstants.NotificationSetting.dungeon_item_found,
+                setting: NotificationConstants.NotificationSetting.Items.dungeon_item_found,
             });
 
             return DungeonBattle.generateNewLootEnemy(input);
@@ -162,7 +162,7 @@ class DungeonRunner {
             Notifier.notify({
                 message: `Found ${amount} × ${GameConstants.humanifyString(input)} in a dungeon chest`,
                 type: NotificationConstants.NotificationOption.success,
-                setting: NotificationConstants.NotificationSetting.dungeon_item_found,
+                setting: NotificationConstants.NotificationSetting.Items.dungeon_item_found,
             });
 
             return player.gainItem(ItemList[input].name, amount);
@@ -228,7 +228,18 @@ class DungeonRunner {
         return RouteHelper.listCompleted(possiblePokemon, includeShiny);
     }
 
+    public static isAchievementsComplete(dungeon: Dungeon) {
+        const dungeonIndex = GameConstants.getDungeonIndex(dungeon.name);
+        return AchievementHandler.achievementList.every(achievement => {
+            return !(achievement.property instanceof ClearDungeonRequirement && achievement.property.dungeonIndex === dungeonIndex && !achievement.isCompleted());
+        });
+    }
+
     public static hasEnoughTokens() {
         return App.game.wallet.hasAmount(new Amount(DungeonRunner.dungeon.tokenCost, GameConstants.Currency.dungeonToken));
+    }
+
+    public static dungeonLevel(): number {
+        return PokemonFactory.routeLevel(this.dungeon.difficultyRoute, player.region);
     }
 }

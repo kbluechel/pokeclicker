@@ -235,7 +235,7 @@ class Underground implements Feature {
 
     gainEnergy() {
         if (this.energy < this.getMaxEnergy()) {
-            const oakMultiplier = App.game.oakItems.calculateBonus(OakItems.OakItem.Cell_Battery);
+            const oakMultiplier = App.game.oakItems.calculateBonus(OakItemType.Cell_Battery);
             const energyGain = this.getEnergyGain();
             this.energy = Math.min(this.getMaxEnergy(), this.energy + (oakMultiplier * energyGain));
             if ((this.energy + energyGain) >= this.getMaxEnergy() && Settings.getSetting('autoBomb').value) {
@@ -246,8 +246,8 @@ class Underground implements Feature {
                     message: 'Your mining energy has reached maximum capacity!',
                     type: NotificationConstants.NotificationOption.success,
                     timeout: 1e4,
-                    sound: NotificationConstants.NotificationSound.underground_energy_full,
-                    setting: NotificationConstants.NotificationSetting.underground_energy_full,
+                    sound: NotificationConstants.NotificationSound.General.underground_energy_full,
+                    setting: NotificationConstants.NotificationSetting.General.underground_energy_full,
                 });
             }
         }
@@ -333,7 +333,7 @@ class Underground implements Feature {
             default:
                 const type = item.valueType.charAt(0).toUpperCase() + item.valueType.slice(1); //Capitalizes string
                 const typeNum = PokemonType[type];
-                App.game.shards.gainShards(GameConstants.PLATE_VALUE * amount, typeNum);
+                App.game.gems.gainGems(GameConstants.PLATE_VALUE * amount, typeNum);
         }
         return success;
     }
