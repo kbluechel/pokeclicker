@@ -14,7 +14,6 @@ class Battle {
     static lastPokemonAttack = Date.now();
     static lastClickAttack = Date.now();
     static route;
-    static timerID = null;
 
     /**
      * Probably not needed right now, but might be if we add more logic to a gameTick.
@@ -35,24 +34,6 @@ class Battle {
         if (App.game.challenges.list.disablePokemonAttack.active() && App.game.gameState != GameConstants.GameState.battleFrontier) {
             return;
         }
-        //#region Attack timer fix
-        /**
-         * possible change to the current attack restrictor
-         * works on routes but not when
-        if (this.timerID == null) {
-            this.timerID = setInterval(() => {
-                if (!this.enemyPokemon()?.isAlive()) {
-                    return;
-                }
-                this.enemyPokemon().damage(App.game.party.calculatePokemonAttack(this.enemyPokemon().type1, this.enemyPokemon().type2));
-                if (!this.enemyPokemon().isAlive()) {
-                    this.defeatPokemon();
-                }
-            }, 900);
-        }
-        */
-        //#endregion
-
         // TODO: figure out a better way of handling this
         // Limit pokemon attack speed, Only allow 1 attack per 900ms
         const now = Date.now();
@@ -78,7 +59,7 @@ class Battle {
             return;
         }
         // TODO: figure out a better way of handling this
-        // Limit click attack speed, Only allow 1 attack per 10ms (100 per second)
+        // Limit click attack speed, Only allow 1 attack per 50ms (20 per second)
         const now = Date.now();
         if (this.lastClickAttack > now - 10) {
             return;
@@ -98,7 +79,6 @@ class Battle {
      * Award the player with money and exp, and throw a Pokéball if applicable
      */
     public static defeatPokemon() {
-
         const enemyPokemon = this.enemyPokemon();
         Battle.route = player.route();
         enemyPokemon.defeat();
@@ -191,8 +171,9 @@ class Battle {
         if (Rand.chance(p)) {
             App.game.farming.gainRandomBerry();
         }
+
         if (App.game.statistics.routeKills[player.region][Battle.route]() > 10000) {
-            if (Rand.chance(p)) {
+            if (Rand.chance(p / 10)) {
                 const r = Rand.intBetween(0, 5);
                 let egg = '';
                 switch (r) {

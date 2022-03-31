@@ -9,8 +9,8 @@ class GymRunner {
     public static running: KnockoutObservable<boolean> = ko.observable(false);
     public static autoRestart: KnockoutObservable<boolean> = ko.observable(false);
     public static initialRun = true;
-    public static freeRebattle = false;
-    public static rebattleRewards = false;
+    static freeRebattle = false;
+    static rebattleRewards = false;
 
     public static startGym(
         gym: Gym,
@@ -36,6 +36,7 @@ class GymRunner {
             App.game.gameState = GameConstants.GameState.gym;
             this.running(true);
 
+
         } else {
             const reqsList = [];
             gym.requirements?.forEach(requirement => {
@@ -49,6 +50,7 @@ class GymRunner {
             });
         }
     }
+
 
     public static tick() {
         if (!this.running()) {

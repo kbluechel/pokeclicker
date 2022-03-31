@@ -48,7 +48,6 @@ class DungeonRunner {
             DungeonRunner.map = new DungeonMap(Math.max(GameConstants.MIN_DUNGEON_SIZE, dungeonSize), flash);
         }
 
-
         DungeonRunner.chestsOpened = 0;
         DungeonRunner.currentTileType = ko.pureComputed(() => {
             return DungeonRunner.map.currentTile().type;

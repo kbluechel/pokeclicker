@@ -7,9 +7,6 @@
     "sourceMap": true
   },
   "compileOnSave": false,
-  "include": [
-    "src/**/*"
-  ],
   "exclude": [
     "node",
     "build",
