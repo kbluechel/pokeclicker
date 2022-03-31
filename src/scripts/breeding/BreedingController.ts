@@ -126,6 +126,19 @@ class BreedingController {
         return (animationType === 'almost' && egg.stepsRemaining() <= 50) ?  'hatchingSoon' : '';
     }
 
+    public static fillHatchery() {
+        if (App.game.breeding.hasFreeQueueSlot()) {
+            const temp = App.game.party.caughtPokemon.sort((x, y) => App.game.statistics.pokemonHatched[x.id]() - App.game.statistics.pokemonHatched[y.id]());
+            let i = 0;
+            while (App.game.breeding.hasFreeQueueSlot()) {
+                if (!temp[i].breeding) {
+                    App.game.breeding.addPokemonToHatchery(temp[i]);
+                }
+                i++;
+            }
+        }
+    }
+
     public static getEggSpots(pokemonName: PokemonNameType) {
         const pokemon = pokemonMap[pokemonName];
         const seed = pokemon.id * pokemon.type.reduce((a,b) => a * (b + 1), 1);
