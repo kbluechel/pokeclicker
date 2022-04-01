@@ -22,7 +22,9 @@ class Battle {
         this.counter = 0;
         this.pokemonAttack();
         if (Settings.getSetting('enableAutoClicker').value) {
-            this.clickAttack();
+            for (let i = 0; i < App.game.badgeCase.badgeCount() % 8; i++) {
+                this.clickAttack();
+            }
         }
     }
 
