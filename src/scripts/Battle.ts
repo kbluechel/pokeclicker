@@ -176,31 +176,15 @@ class Battle {
 
         if (App.game.statistics.routeKills[player.region][Battle.route]() > 10000) {
             if (Rand.chance(p / 10)) {
-                const r = Rand.intBetween(0, 5);
-                let egg = '';
-                switch (r) {
-                    case 0:
-                        egg = 'Fire_egg';
-                        break;
-                    case 1:
-                        egg = 'Water_egg';
-                        break;
-                    case 2:
-                        egg = 'Grass_egg';
-                        break;
-                    case 3:
-                        egg = 'Fighting_egg';
-                        break;
-                    case 4:
-                        egg = 'Electric_egg';
-                        break;
-                    case 5:
-                        egg = 'Dragon_egg';
-                        break;
-                    default:
-                        break;
-                }
-                player.gainItem(ItemList[egg].name, 1);
+                const randomReward = [
+                    'Leaf_stone', 'Fire_stone', 'Water_stone', 'Thunder_stone', 'Moon_stone', 'Trade_stone', 'Sun_stone', 'Soothe_bell',
+                    'Metal_coat', 'Kings_rock', 'Upgrade', 'Dragon_scale', 'Prism_scale', 'Deepsea_tooth', 'Deepsea_scale', 'Shiny_stone',
+                    'Dusk_stone', 'Dawn_stone', 'Razor_claw', 'Razor_fang', 'Electirizer', 'Magmarizer', 'Protector', 'Dubious_disc',
+                    'Reaper_cloth', 'Black_DNA', 'White_DNA', 'Sachet', 'Whipped_dream', 'Ice_stone', 'Fire_egg', 'Water_egg', 'Grass_egg',
+                    'Fighting_egg', 'Electric_egg', 'Dragon_egg',
+                ];
+                const item = randomReward[Math.floor(Math.random() * randomReward.length)];
+                player.gainItem(ItemList[item].name, 1);
             }
         }
     }
