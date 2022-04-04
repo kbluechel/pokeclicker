@@ -128,11 +128,12 @@ class BreedingController {
 
     public static fillHatchery() {
         if (App.game.breeding.hasFreeQueueSlot()) {
-            const temp = App.game.party.caughtPokemon.sort((x, y) => App.game.statistics.pokemonHatched[x.id]() - App.game.statistics.pokemonHatched[y.id]());
+            const breedablePkmn = App.game.party.caughtPokemon.filter(x => x.level == 100);
+            breedablePkmn.sort((x, y) => App.game.statistics.pokemonHatched[x.id]() - App.game.statistics.pokemonHatched[y.id]());
             let i = 0;
             while (App.game.breeding.hasFreeQueueSlot()) {
-                if (!temp[i].breeding) {
-                    App.game.breeding.addPokemonToHatchery(temp[i]);
+                if (!breedablePkmn[i].breeding) {
+                    App.game.breeding.addPokemonToHatchery(breedablePkmn[i]);
                 }
                 i++;
             }
