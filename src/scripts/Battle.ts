@@ -22,7 +22,7 @@ class Battle {
         this.counter = 0;
         this.pokemonAttack();
         if (Settings.getSetting('enableAutoClicker').value) {
-            for (let i = 0; i < App.game.badgeCase.badgeCount() % 8; i++) {
+            for (let i = 0; i < App.game.badgeCase.badgeCount() / 8; i++) {
                 this.clickAttack();
             }
         }
@@ -60,13 +60,6 @@ class Battle {
         if (App.game.challenges.list.disableClickAttack.active() && player.starter() != GameConstants.Starter.None) {
             return;
         }
-        // TODO: figure out a better way of handling this
-        // Limit click attack speed, Only allow 1 attack per 50ms (20 per second)
-        const now = Date.now();
-        if (this.lastClickAttack > now - 10) {
-            return;
-        }
-        this.lastClickAttack = now;
         if (!this.enemyPokemon()?.isAlive()) {
             return;
         }
@@ -186,6 +179,7 @@ class Battle {
                 const item = randomReward[Math.floor(Math.random() * randomReward.length)];
                 player.gainItem(ItemList[item].name, 1);
             }
+            App.game.wallet.gainDungeonTokens(100, false);
         }
     }
 
