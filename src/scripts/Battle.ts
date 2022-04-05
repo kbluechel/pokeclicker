@@ -21,10 +21,9 @@ class Battle {
     public static tick() {
         this.counter = 0;
         this.pokemonAttack();
-        if (Settings.getSetting('enableAutoClicker').value) {
-            for (let i = 0; i < App.game.badgeCase.badgeCount() / 8; i++) {
-                this.clickAttack();
-            }
+        if (Settings.getSetting('enableAutoClicker').value && App.game.keyItems.hasKeyItem(KeyItems.KeyItem.Auto_clicker)) {
+            this.clickAttack();
+            this.clickAttack();
         }
     }
 
@@ -180,6 +179,7 @@ class Battle {
                 player.gainItem(ItemList[item].name, 1);
             }
             App.game.wallet.gainDungeonTokens(100, false);
+            App.game.wallet.gainQuestPoints(10, false);
         }
     }
 
