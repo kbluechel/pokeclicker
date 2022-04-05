@@ -178,8 +178,13 @@ class Battle {
                 const item = randomReward[Math.floor(Math.random() * randomReward.length)];
                 player.gainItem(ItemList[item].name, 1);
             }
-            App.game.wallet.gainDungeonTokens(100, false);
-            App.game.wallet.gainQuestPoints(10, false);
+            App.game.wallet.gainDungeonTokens(1000, false);
+            App.game.wallet.gainQuestPoints(100, false);
+            if (Rand.chance(p)) {
+                App.game.wallet.gainFarmPoints(10, false);
+                App.game.wallet.gainBattlePoints(10, false);
+                App.game.wallet.gainDiamonds(1, false);
+            }
         }
     }
 
