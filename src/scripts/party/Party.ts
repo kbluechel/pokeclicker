@@ -187,7 +187,7 @@ class Party implements Feature {
 
         const bonus = this.multiplier.getBonus('clickAttack', useItem);
 
-        const challengeBonus = clickChallenge ? Math.max(App.game.badgeCase.badgeCount(), 2) : 1;
+        const challengeBonus = clickChallenge ? Math.max(App.game.badgeCase.badgeCount(), 2) : Math.max(App.game.badgeCase.badgeCount() / 4, 1);
 
         return Math.floor(clickAttack * bonus * challengeBonus);
     }
