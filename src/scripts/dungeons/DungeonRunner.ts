@@ -33,7 +33,8 @@ class DungeonRunner {
         DungeonBattle.trainerPokemonIndex(0);
         DungeonBattle.enemyPokemon(null);
 
-        DungeonRunner.timeLeft(GameConstants.DUNGEON_TIME);
+        DungeonRunner.timeLeft(GameConstants.DUNGEON_TIME * FluteEffectRunner.getFluteMultiplier(GameConstants.FluteItemType.Time_Flute));
+        DungeonRunner.timeLeftPercentage(100);
         // Dungeon size increases with each region
         let dungeonSize = GameConstants.BASE_DUNGEON_SIZE + player.region;
         // Decrease dungeon size by 1 for every 10, 100, 1000 etc completes
@@ -66,8 +67,10 @@ class DungeonRunner {
                 this.dungeonLost();
             }
         }
-        this.timeLeft(this.timeLeft() - GameConstants.DUNGEON_TICK);
-        this.timeLeftPercentage(Math.floor(this.timeLeft() / GameConstants.DUNGEON_TIME * 100));
+        if (this.map.playerMoved()) {
+            this.timeLeft(this.timeLeft() - GameConstants.DUNGEON_TICK);
+            this.timeLeftPercentage(Math.floor(this.timeLeft() / GameConstants.DUNGEON_TIME * 100));
+        }
     }
 
     /**
@@ -223,7 +226,7 @@ class DungeonRunner {
     })
 
     public static dungeonCompleted(dungeon: Dungeon, includeShiny: boolean) {
-        const possiblePokemon: PokemonNameType[] = dungeon.allPokemon;
+        const possiblePokemon: PokemonNameType[] = dungeon.allAvailablePokemon();
         return RouteHelper.listCompleted(possiblePokemon, includeShiny);
     }
 
@@ -231,6 +234,12 @@ class DungeonRunner {
         const dungeonIndex = GameConstants.getDungeonIndex(dungeon.name);
         return AchievementHandler.achievementList.every(achievement => {
             return !(achievement.property instanceof ClearDungeonRequirement && achievement.property.dungeonIndex === dungeonIndex && !achievement.isCompleted());
+        });
+    }
+
+    public static isThereQuestAtLocation(dungeon: Dungeon) {
+        return App.game.quests.currentQuests().some(q => {
+            return q instanceof DefeatDungeonQuest && q.dungeon == dungeon.name;
         });
     }
 

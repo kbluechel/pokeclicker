@@ -1,3 +1,4 @@
+import { formatDate } from './GameConstants';
 import NotificationConstants from './notifications/NotificationConstants';
 import Notifier from './notifications/Notifier';
 import Profile from './profile/Profile';
@@ -54,8 +55,14 @@ export default class SaveSelector {
         try {
             const rawData = localStorage.getItem(`save${key}`);
             const saveData = JSON.parse(rawData);
+            let username = saveData.profile?.name ?? 'Trainer';
+            try {
+                username = decodeURI(saveData.profile?.name ?? 'Trainer');
+            } catch (e) {
+                console.warn('Unable to parse username');
+            }
             return Profile.getTrainerCard(
-                decodeURI(saveData.profile?.name ?? 'Trainer'),
+                username,
                 saveData.profile?.trainer,
                 saveData.profile?.pokemon ?? saveData.party.caughtPokemon[0]?.id,
                 saveData.profile?.pokemonShiny ?? saveData.party.caughtPokemon[0]?.shiny,
@@ -70,7 +77,7 @@ export default class SaveSelector {
             );
         } catch (e) {
             // eslint-disable-next-line no-console
-            console.log('Failed to load save:', key, e);
+            console.log(`[${formatDate(new Date())}] %cFailed to load save:`, 'color:#e74c3c;font-weight:900;', key, e);
             return document.createElement('div');
         }
     }

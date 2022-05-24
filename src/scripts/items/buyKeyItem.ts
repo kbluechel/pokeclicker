@@ -1,10 +1,10 @@
-///<reference path="../keyItems/KeyItems.ts"/>
+///<reference path="../../declarations/keyItems/KeyItems.d.ts"/>
 class BuyKeyItem extends Item {
 
-        item: KeyItems.KeyItem;
+        item: KeyItemType;
 
-        constructor(item: KeyItems.KeyItem, basePrice: number, currency: GameConstants.Currency = GameConstants.Currency.questPoint, options?: ShopOptions, displayName?: string) {
-            super(KeyItems.KeyItem[item], basePrice, currency, { maxAmount: 1, ...options }, displayName);
+        constructor(item: KeyItemType, basePrice: number, currency: GameConstants.Currency = GameConstants.Currency.questPoint, options?: ShopOptions, displayName?: string) {
+            super(KeyItemType[item], basePrice, currency, { maxAmount: 1, ...options }, displayName);
             this.item = item;
         }
 
@@ -30,6 +30,5 @@ class BuyKeyItem extends Item {
 }
 
 
-ItemList['Dungeon_ticket'] = new BuyKeyItem(KeyItems.KeyItem.Dungeon_ticket, 100, undefined, undefined, 'Dungeon Ticket');
-ItemList['Explorer_kit']   = new BuyKeyItem(KeyItems.KeyItem.Explorer_kit, 5000, undefined, undefined, 'Explorer Kit');
-ItemList['Auto_clicker']   = new BuyKeyItem(KeyItems.KeyItem.Auto_clicker, 20000, undefined, undefined, 'Auto Clicker');
+ItemList['Dungeon_ticket'] = new BuyKeyItem(KeyItemType.Dungeon_ticket, 100, undefined, undefined, 'Dungeon Ticket');
+ItemList['Explorer_kit']   = new BuyKeyItem(KeyItemType.Explorer_kit, 5000, undefined, undefined, 'Explorer Kit');
