@@ -21,7 +21,7 @@ class Battle {
     public static tick() {
         this.counter = 0;
         this.pokemonAttack();
-        if (Settings.getSetting('enableAutoClicker').value && App.game.keyItems.hasKeyItem(KeyItems.KeyItem.Auto_clicker)) {
+        if (Settings.getSetting('enableAutoClicker').value && App.game.keyItems.hasKeyItem(KeyItemType.Auto_clicker)) {
             for (let i = 0; i < App.game.badgeCase.badgeCount() / 4; i++) {
                 this.clickAttack();
             }

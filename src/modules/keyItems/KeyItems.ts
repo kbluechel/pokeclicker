@@ -92,6 +92,7 @@ export default class KeyItems implements Feature {
             // TODO buy for 500 quest points
             new KeyItem(KeyItemType.Event_calendar, 'This calendar will keep you up to date on the latest events', undefined, undefined, undefined, 'Event Calender'),
             new KeyItem(KeyItemType.Gem_case, 'A case specifically designed for holding gems', undefined, undefined, undefined, 'Gem Case'),
+            new KeyItem(KeyItemType.Auto_clicker, 'Advanced PokeTech to dmg pokemon without the need of fighting', undefined, undefined, undefined, 'Auto Clicker'),
             new KeyItem(KeyItemType.DNA_splicers, 'A splicer that fuses certain Pokémon',
                 () => App.game.statistics.dungeonsCleared[getDungeonIndex('Giant Chasm')]() > 0,
                 undefined, undefined, 'DNA Splicers'),
