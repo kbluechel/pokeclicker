@@ -4,6 +4,7 @@
 class GymRunner {
     public static timeLeft: KnockoutObservable<number> = ko.observable(GameConstants.GYM_TIME);
     public static timeLeftPercentage: KnockoutObservable<number> = ko.observable(100);
+    public static timeBonus: KnockoutObservable<number> = ko.observable(1);
 
     public static gymObservable: KnockoutObservable<Gym> = ko.observable(GymList['Pewter City']);
     public static running: KnockoutObservable<boolean> = ko.observable(false);
@@ -19,15 +20,13 @@ class GymRunner {
         this.autoRestart(autoRestart);
         this.running(false);
         this.gymObservable(gym);
-        if (gym instanceof Champion) {
-            gym.setPokemon(player.starter());
-        }
         App.game.gameState = GameConstants.GameState.idle;
-        GymRunner.timeLeft(GameConstants.GYM_TIME);
+        DungeonRunner.timeBonus(FluteEffectRunner.getFluteMultiplier(GameConstants.FluteItemType.Time_Flute));
+        GymRunner.timeLeft(GameConstants.GYM_TIME * this.timeBonus());
         GymRunner.timeLeftPercentage(100);
 
         GymBattle.gym = gym;
-        GymBattle.totalPokemons(gym.pokemons.length);
+        GymBattle.totalPokemons(gym.getPokemonList().length);
         GymBattle.index(0);
         GymBattle.generateNewEnemy();
         App.game.gameState = GameConstants.GameState.gym;
@@ -64,15 +63,33 @@ class GymRunner {
         if (this.timeLeft() < 0) {
             GymRunner.gymLost();
         }
+
         this.timeLeft(this.timeLeft() - GameConstants.GYM_TICK);
-        this.timeLeftPercentage(Math.floor(this.timeLeft() / GameConstants.GYM_TIME * 100));
+        this.timeLeftPercentage(Math.floor(this.timeLeft() / (GameConstants.GYM_TIME * FluteEffectRunner.getFluteMultiplier(GameConstants.FluteItemType.Time_Flute)) * 100));
+
+        const currentFluteBonus = FluteEffectRunner.getFluteMultiplier(GameConstants.FluteItemType.Time_Flute);
+        if (currentFluteBonus != this.timeBonus()) {
+            if (currentFluteBonus > this.timeBonus()) {
+                if (this.timeBonus() === 1) {
+                    this.timeBonus(currentFluteBonus);
+                    this.timeLeft(this.timeLeft() * this.timeBonus());
+                } else {
+                    this.timeLeft(this.timeLeft() / this.timeBonus());
+                    this.timeBonus(currentFluteBonus);
+                    this.timeLeft(this.timeLeft() * this.timeBonus());
+                }
+            } else {
+                this.timeLeft(this.timeLeft() / this.timeBonus());
+                this.timeBonus(currentFluteBonus);
+            }
+        }
     }
 
     public static gymLost() {
         if (this.running()) {
             this.running(false);
             Notifier.notify({
-                message: `It appears you are not strong enough to defeat ${GymBattle.gym.leaderName}`,
+                message: `It appears you are not strong enough to defeat ${GymBattle.gym.leaderName.replace(/\d/g, '')}.`,
                 type: NotificationConstants.NotificationOption.danger,
             });
             App.game.gameState = GameConstants.GameState.town;
@@ -83,7 +100,7 @@ class GymRunner {
         if (this.running()) {
             this.running(false);
             Notifier.notify({
-                message: `Congratulations, you defeated ${GymBattle.gym.leaderName}!`,
+                message: `Congratulations, you defeated ${GymBattle.gym.leaderName.replace(/\d/g, '')}!`,
                 type: NotificationConstants.NotificationOption.success,
                 setting: NotificationConstants.NotificationSetting.General.gym_won,
             });

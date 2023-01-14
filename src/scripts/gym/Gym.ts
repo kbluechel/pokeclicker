@@ -10,6 +10,7 @@
 interface gymFlags {
     quest?: boolean;
     achievement?: boolean;
+    champion?: boolean;
 }
 
 /**
@@ -36,17 +37,18 @@ class Gym extends TownContent {
     public flags = {
         quest: true,
         achievement: true,
+        champion: false,
     };
 
     public areaStatus(): areaStatus {
-        if (this.isUnlocked()) {
-            if (!App.game.badgeCase.hasBadge(this.badgeReward)) {
-                return areaStatus.unlockedUnfinished;
-            } else if (this.isThereQuestAtLocation()) {
-                return areaStatus.questAtLocation;
-            } else if (!this.isAchievementsComplete()) {
-                return areaStatus.missingAchievement;
-            }
+        if (!this.isUnlocked()) {
+            return areaStatus.locked;
+        } else if (!App.game.badgeCase.hasBadge(this.badgeReward)) {
+            return areaStatus.unlockedUnfinished;
+        } else if (this.isThereQuestAtLocation()) {
+            return areaStatus.questAtLocation;
+        } else if (!this.isAchievementsComplete()) {
+            return areaStatus.missingAchievement;
         }
         return areaStatus.completed;
     }
@@ -61,24 +63,29 @@ class Gym extends TownContent {
     constructor(
         public leaderName: string,
         public town: string,
-        public pokemons: GymPokemon[],
+        private pokemons: GymPokemon[],
         public badgeReward: BadgeEnums,
         public moneyReward: number,
         public defeatMessage: string,
-        requirements: (OneFromManyRequirement | Requirement)[] = [],
+        requirements: Requirement[] = [],
         public rewardFunction = () => {},
         {
             quest = true,
             achievement = true,
-        }: gymFlags = {}
+            champion = false,
+        }: gymFlags = {},
+        public displayName?: string
     ) {
         super(requirements);
         this.flags.quest = quest;
         this.flags.achievement = achievement;
-        if (!town.includes('Elite') && !town.includes('Champion')) {
-            this.buttonText = `${leaderName.replace(/\d/g,'')}'s gym`;
+        this.flags.champion = champion;
+        if (displayName) {
+            this.buttonText = displayName;
+        } else if (!town.includes('Elite') && !town.includes('Champion') && !town.includes('Supreme')) {
+            this.buttonText = `${leaderName}'s Gym`;
         } else {
-            this.buttonText = leaderName.replace(/\d/g,'');
+            this.buttonText = town;
         }
     }
 
@@ -116,5 +123,9 @@ class Gym extends TownContent {
 
     get imagePath(): string {
         return `assets/images/gymLeaders/${GymBattle.gym.leaderName}.png`;
+    }
+
+    public getPokemonList() {
+        return this.pokemons.filter((p) => p.requirements.every((r => r.isCompleted())));
     }
 }

@@ -20,9 +20,11 @@ module.exports = {
         gtag: 'readonly',
         App: 'readonly',
         player: 'readonly',
-        pokemonMap: 'readonly',
         Save: 'readonly',
         MapHelper: 'readonly',
+        DungeonRunner: 'readonly',
+        GymRunner: 'readonly',
+        AchievementHandler: 'readonly',
     },
     rules: {
         indent: 'off',
@@ -52,5 +54,7 @@ module.exports = {
         '@typescript-eslint/lines-between-class-members': ['error', { exceptAfterSingleLine: true }],
         '@typescript-eslint/member-ordering': ['error'],
         'no-alert': 'error',
+        'no-sparse-arrays': 'error',
+        'dot-notation': 'error',
     },
 };

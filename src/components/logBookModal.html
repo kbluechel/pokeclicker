@@ -20,15 +20,15 @@
                     <thead>
                       <tr>
                         <th>Type</th>
-                        <th>Message</th>
+                        <th style="width:65%">Message</th>
                         <th>Date</th>
                       </tr>
                     </thead>
                     <tbody data-bind="foreach: App.game.logbook.filteredLogs()">
                       <tr>
-                        <td class="tight" data-bind="html:type.label, class: 'table-' + type.display"></td>
-                        <td class="text-left" data-bind="text:description">-</td>
-                        <td class="text-left"><code data-bind="text:new Date(date).toLocaleString()">-</code></td>
+                        <td class="tight" data-bind="text: type.label, class: 'table-' + type.display"></td>
+                        <td class="text-left" data-bind="text: description">-</td>
+                        <td class="text-left"><code data-bind="text: new Date(date).toLocaleString()">-</code></td>
                       </tr>
                     </tbody>
                 </table>

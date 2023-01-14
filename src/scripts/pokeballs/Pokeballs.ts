@@ -23,7 +23,7 @@ class Pokeballs implements Feature {
 
     constructor() {
         this.pokeballs = [
-            new Pokeball(GameConstants.Pokeball.Pokeball, () => 0, 1250, 'A standard Pokéball', undefined, 25),
+            new Pokeball(GameConstants.Pokeball.Pokeball, () => 0, 1250, 'A standard Poké Ball', undefined, 25),
             new Pokeball(GameConstants.Pokeball.Greatball, () => 5, 1000, '+5% chance to catch'),
             new Pokeball(GameConstants.Pokeball.Ultraball, () => 10, 750, '+10% chance to catch'),
             new Pokeball(GameConstants.Pokeball.Masterball, () => 100, 500, '100% chance to catch'),
@@ -62,7 +62,7 @@ class Pokeballs implements Feature {
                 return 0;
             }, 1000, 'Increased catch rate at night time or in dungeons', new RouteKillRequirement(10, GameConstants.Region.johto, 34)),
             // TODO: this needs some sort of bonus, possibly extra dungeon tokens
-            new Pokeball(GameConstants.Pokeball.Luxuryball, () => 0, 1250, 'A Luxury Pokéball', new RouteKillRequirement(10, GameConstants.Region.johto, 34)),
+            new Pokeball(GameConstants.Pokeball.Luxuryball, () => 0, 1250, 'A Luxury Poké Ball', new RouteKillRequirement(10, GameConstants.Region.johto, 34)),
 
             new Pokeball(GameConstants.Pokeball.Diveball, () => {
 
@@ -74,18 +74,21 @@ class Pokeballs implements Feature {
             }, 1250, 'Increased catch rate on water routes', new RouteKillRequirement(10, GameConstants.Region.hoenn, 101)),
 
             new Pokeball(GameConstants.Pokeball.Lureball, () => {
-                const numLandPokemon = Routes.getRoute(player.region,player.route()).pokemon.land.length > 0;
-                const isWaterPokemon = Routes.getRoute(player.region,player.route()).pokemon.water.includes(Battle.enemyPokemon().name);
+                if (App.game.gameState == GameConstants.GameState.fighting && player.route()) {
+                    const hasLandPokemon = Routes.getRoute(player.region,player.route()).pokemon.land.length > 0;
+                    const isWaterPokemon = Routes.getRoute(player.region,player.route()).pokemon.water.includes(Battle.enemyPokemon().name);
 
-                // If route has Land Pokémon and the current pokémon is a Water Pokémon
-                if (numLandPokemon == true && isWaterPokemon == true) {
-                    return 15;
+                    // If route has Land Pokémon and the current pokémon is a Water Pokémon
+                    if (hasLandPokemon && isWaterPokemon) {
+                        return 15;
+                    }
                 }
                 return 0;
             }, 1250, 'Increased catch rate on fished Pokémon', new RouteKillRequirement(10, GameConstants.Region.hoenn, 101)),
 
             new Pokeball(GameConstants.Pokeball.Nestball, () => {
-                const maxRoute = MapHelper.normalizeRoute(Routes.getRoute(player.highestRegion(), Routes.getRoutesByRegion(player.highestRegion()).length - 1).number, player.highestRegion());
+                const highestRegionRoutes = Routes.getRoutesByRegion(player.highestRegion());
+                const maxRoute = MapHelper.normalizeRoute(highestRegionRoutes[highestRegionRoutes.length - 1].number, player.highestRegion());
                 const currentRoute = MapHelper.normalizeRoute(player.route(),player.region);
 
                 // Increased rate for earlier routes, scales with regional progression
@@ -96,8 +99,11 @@ class Pokeballs implements Feature {
                 const amountCaught = App.game.statistics.pokemonCaptured[Battle.enemyPokemon().id]();
 
                 return Math.min(15,Math.pow(amountCaught,2) / 5000);
-            }, 1250, 'Increased catch rate with more catches', new RouteKillRequirement(10, GameConstants.Region.johto, 34)),
+            }, 1250, 'Increased catch rate and EV gain rate with more catches', new RouteKillRequirement(10, GameConstants.Region.johto, 34)),
 
+            new Pokeball(GameConstants.Pokeball.Beastball, () => {
+                return 10;
+            }, 1000, 'Can only be used on Ultra Beasts', new TemporaryBattleRequirement('Anabel')),
         ];
         this._alreadyCaughtSelection = ko.observable(this.defaults.alreadyCaughtSelection);
         this._alreadyCaughtShinySelection = ko.observable(this.defaults.alreadyCaughtShinySelection);
@@ -120,7 +126,7 @@ class Pokeballs implements Feature {
                     selection(GameConstants.Pokeball.Ultraball);
                     Notifier.notify({
                         title: 'Challenge Mode',
-                        message: 'Masterballs are disabled!',
+                        message: 'Master Balls are disabled!',
                         type: NotificationConstants.NotificationOption.danger,
                     });
                 } else if (!this.pokeballs[value]?.unlocked()) {
@@ -140,15 +146,16 @@ class Pokeballs implements Feature {
     public calculatePokeballToUse(id: number, isShiny: boolean): GameConstants.Pokeball {
         const alreadyCaught = App.game.party.alreadyCaughtPokemon(id);
         const alreadyCaughtShiny = App.game.party.alreadyCaughtPokemon(id, true);
+        const pokemon = PokemonHelper.getPokemonById(id);
         let pref: GameConstants.Pokeball;
+
         // just check against alreadyCaughtShiny as this returns false when you don't have the pokemon yet.
+
         if (isShiny) {
             if (!alreadyCaughtShiny) {
-                // if the pokemon is also not caught, use the higher selection since a notCaughtShiny is also a notCaught pokemon
-                pref = !alreadyCaught ? Math.max(this.notCaughtSelection, this.notCaughtShinySelection) : this.notCaughtShinySelection;
+                pref = this.notCaughtShinySelection;
             } else {
-                // if the shiny is already caught, use the higher selection since the pokemon is also a caught pokemon
-                pref = Math.max(this.alreadyCaughtSelection, this.alreadyCaughtShinySelection);
+                pref = this.alreadyCaughtShinySelection;
             }
         } else {
             if (!alreadyCaught) {
@@ -159,6 +166,16 @@ class Pokeballs implements Feature {
         }
 
         let use: GameConstants.Pokeball = GameConstants.Pokeball.None;
+
+        if (pref == GameConstants.Pokeball.Beastball) {
+            if (GameConstants.UltraBeastType[pokemon.name] != undefined && this.pokeballs[GameConstants.Pokeball.Beastball].quantity() > 0) {
+                return GameConstants.Pokeball.Beastball;
+            } else {
+                return GameConstants.Pokeball.None;
+            }
+        } else if (GameConstants.UltraBeastType[pokemon.name] != undefined) {
+            return GameConstants.Pokeball.None;
+        }
 
         if (this.pokeballs[pref]?.quantity()) {
             return pref;
@@ -185,7 +202,7 @@ class Pokeballs implements Feature {
         GameHelper.incrementObservable(this.pokeballs[ball].quantity, amount);
         GameHelper.incrementObservable(App.game.statistics.pokeballsObtained[ball],amount);
         if (purchase === true) {
-            GameHelper.incrementObservable(App.game.statistics.pokeballsBought[ball],amount);
+            GameHelper.incrementObservable(App.game.statistics.pokeballsPurchased[ball],amount);
         }
     }
 
@@ -203,6 +220,11 @@ class Pokeballs implements Feature {
         return pokeball ? pokeball.quantity() : 0;
     }
 
+    getEPBonus(ball: GameConstants.Pokeball): number {
+        const pokeballType = this.pokeballs[ball].type;
+        return pokeballType == GameConstants.Pokeball.Repeatball ? GameConstants.REPEATBALL_EP_MODIFIER : 1;
+    }
+
     canAccess(): boolean {
         return true;
     }
@@ -212,13 +234,13 @@ class Pokeballs implements Feature {
             return;
         }
 
-        if (json['pokeballs'] != null) {
-            json['pokeballs'].map((amt: number, type: number) => this.pokeballs[type].quantity(amt));
+        if (json.pokeballs != null) {
+            json.pokeballs.map((amt: number, type: number) => this.pokeballs[type].quantity(amt));
         }
-        this.notCaughtSelection = json['notCaughtSelection'] ?? this.defaults.notCaughtSelection;
-        this.notCaughtShinySelection = json['notCaughtShinySelection'] ?? this.defaults.notCaughtShinySelection;
-        this.alreadyCaughtSelection = json['alreadyCaughtSelection'] ?? this.defaults.alreadyCaughtSelection;
-        this.alreadyCaughtShinySelection = json['alreadyCaughtShinySelection'] ?? this.defaults.alreadyCaughtShinySelection;
+        this.notCaughtSelection = json.notCaughtSelection ?? this.defaults.notCaughtSelection;
+        this.notCaughtShinySelection = json.notCaughtShinySelection ?? this.defaults.notCaughtShinySelection;
+        this.alreadyCaughtSelection = json.alreadyCaughtSelection ?? this.defaults.alreadyCaughtSelection;
+        this.alreadyCaughtShinySelection = json.alreadyCaughtShinySelection ?? this.defaults.alreadyCaughtShinySelection;
     }
 
     toJSON(): Record<string, any> {

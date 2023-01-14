@@ -1,9 +1,11 @@
+/// <reference path="./Shop.ts"/>
+
 class GemMasterShop extends Shop {
     constructor(
-        public items: Item[],
-        public name: string = 'Gem Master'
+        public name: string = 'Gem Master',
+        requirements: (Requirement | OneFromManyRequirement)[] = []
     ) {
-        super(items, name);
+        super([], name, requirements);
     }
     public onclick(): void {
         ShopHandler.showShop(this);

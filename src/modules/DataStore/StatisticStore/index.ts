@@ -22,7 +22,8 @@ export default class Statistics implements Saveable {
     clickAttacks: KnockoutObservable<number>;
     questsCompleted: KnockoutObservable<number>;
     totalGemsGained: KnockoutObservable<number>;
-    totalProteinsObtained: KnockoutObservable<number>;
+    totalVitaminsPurchased: KnockoutObservable<number>;
+    totalVitaminsObtained: KnockoutObservable<number>;
     // Currency
     totalMoney: KnockoutObservable<number>;
     totalDungeonTokens: KnockoutObservable<number>;
@@ -30,6 +31,7 @@ export default class Statistics implements Saveable {
     totalDiamonds: KnockoutObservable<number>;
     totalFarmPoints: KnockoutObservable<number>;
     totalBattlePoints: KnockoutObservable<number>;
+    totalContestTokens: KnockoutObservable<number>;
     // Pokemon
     totalPokemonCaptured: KnockoutObservable<number>;
     totalPokemonDefeated: KnockoutObservable<number>;
@@ -39,6 +41,32 @@ export default class Statistics implements Saveable {
     totalShinyPokemonDefeated: KnockoutObservable<number>;
     totalShinyPokemonEncountered: KnockoutObservable<number>;
     totalShinyPokemonHatched: KnockoutObservable<number>;
+
+    totalMalePokemonCaptured: KnockoutObservable<number>;
+    totalMalePokemonDefeated: KnockoutObservable<number>;
+    totalMalePokemonEncountered: KnockoutObservable<number>;
+    totalMalePokemonHatched: KnockoutObservable<number>;
+    totalFemalePokemonCaptured: KnockoutObservable<number>;
+    totalFemalePokemonDefeated: KnockoutObservable<number>;
+    totalFemalePokemonEncountered: KnockoutObservable<number>;
+    totalFemalePokemonHatched: KnockoutObservable<number>;
+    totalGenderlessPokemonCaptured: KnockoutObservable<number>;
+    totalGenderlessPokemonDefeated: KnockoutObservable<number>;
+    totalGenderlessPokemonEncountered: KnockoutObservable<number>;
+    totalGenderlessPokemonHatched: KnockoutObservable<number>;
+
+    totalShinyMalePokemonCaptured: KnockoutObservable<number>;
+    totalShinyMalePokemonDefeated: KnockoutObservable<number>;
+    totalShinyMalePokemonEncountered: KnockoutObservable<number>;
+    totalShinyMalePokemonHatched: KnockoutObservable<number>;
+    totalShinyFemalePokemonCaptured: KnockoutObservable<number>;
+    totalShinyFemalePokemonDefeated: KnockoutObservable<number>;
+    totalShinyFemalePokemonEncountered: KnockoutObservable<number>;
+    totalShinyFemalePokemonHatched: KnockoutObservable<number>;
+    totalShinyGenderlessPokemonCaptured: KnockoutObservable<number>;
+    totalShinyGenderlessPokemonDefeated: KnockoutObservable<number>;
+    totalShinyGenderlessPokemonEncountered: KnockoutObservable<number>;
+    totalShinyGenderlessPokemonHatched: KnockoutObservable<number>;
     // Underground
     undergroundItemsFound: KnockoutObservable<number>;
     undergroundLayersMined: KnockoutObservable<number>;
@@ -55,12 +83,18 @@ export default class Statistics implements Saveable {
     // Battle Frontier
     battleFrontierTotalStagesCompleted: KnockoutObservable<number>;
     battleFrontierHighestStageCompleted: KnockoutObservable<number>;
+    // Safari Zone
+    safariTimesEntered: KnockoutObservable<number>;
+    safariRocksThrown: KnockoutObservable<number>;
+    safariBaitThrown: KnockoutObservable<number>;
+    safariBallsThrown: KnockoutObservable<number>;
+    safariStepsTaken: KnockoutObservable<number>;
 
     /*
      * arrayObservables
      */
     pokeballsUsed: Array<KnockoutObservable<number>>;
-    pokeballsBought: Array<KnockoutObservable<number>>;
+    pokeballsPurchased: Array<KnockoutObservable<number>>;
     pokeballsObtained: Array<KnockoutObservable<number>>;
     // Other
     gemsGained: Array<KnockoutObservable<number>>;
@@ -86,13 +120,30 @@ export default class Statistics implements Saveable {
     shinyPokemonDefeated: any;
     shinyPokemonEncountered: any;
     shinyPokemonHatched: any;
+    malePokemonCaptured: any;
+    malePokemonDefeated: any;
+    malePokemonEncountered: any;
+    malePokemonHatched: any;
+    femalePokemonCaptured: any;
+    femalePokemonDefeated: any;
+    femalePokemonEncountered: any;
+    femalePokemonHatched: any;
+    shinyMalePokemonCaptured: any;
+    shinyFemalePokemonCaptured: any;
+    shinyMalePokemonDefeated: any;
+    shinyFemalePokemonDefeated: any;
+    shinyMalePokemonEncountered: any;
+    shinyFemalePokemonEncountered: any;
+    shinyMalePokemonHatched: any;
+    shinyFemalePokemonHatched: any;
 
     observables = [
         'secondsPlayed',
         'clickAttacks',
         'questsCompleted',
         'totalGemsGained',
-        'totalProteinsObtained',
+        'totalVitaminsPurchased',
+        'totalVitaminsObtained',
         'totalMoney',
         'totalDungeonTokens',
         'totalQuestPoints',
@@ -107,6 +158,30 @@ export default class Statistics implements Saveable {
         'totalShinyPokemonDefeated',
         'totalShinyPokemonEncountered',
         'totalShinyPokemonHatched',
+        'totalMalePokemonCaptured',
+        'totalMalePokemonDefeated',
+        'totalMalePokemonEncountered',
+        'totalMalePokemonHatched',
+        'totalFemalePokemonCaptured',
+        'totalFemalePokemonDefeated',
+        'totalFemalePokemonEncountered',
+        'totalFemalePokemonHatched',
+        'totalGenderlessPokemonCaptured',
+        'totalGenderlessPokemonDefeated',
+        'totalGenderlessPokemonEncountered',
+        'totalGenderlessPokemonHatched',
+        'totalShinyMalePokemonCaptured',
+        'totalShinyMalePokemonDefeated',
+        'totalShinyMalePokemonEncountered',
+        'totalShinyMalePokemonHatched',
+        'totalShinyFemalePokemonCaptured',
+        'totalShinyFemalePokemonDefeated',
+        'totalShinyFemalePokemonEncountered',
+        'totalShinyFemalePokemonHatched',
+        'totalShinyGenderlessPokemonCaptured',
+        'totalShinyGenderlessPokemonDefeated',
+        'totalShinyGenderlessPokemonEncountered',
+        'totalShinyGenderlessPokemonHatched',
         'undergroundItemsFound',
         'undergroundLayersMined',
         'undergroundDailyDealTrades',
@@ -120,12 +195,17 @@ export default class Statistics implements Saveable {
         'berryDailyDealTrades',
         'battleFrontierTotalStagesCompleted',
         'battleFrontierHighestStageCompleted',
+        'safariTimesEntered',
+        'safariRocksThrown',
+        'safariBaitThrown',
+        'safariBallsThrown',
+        'safariStepsTaken',
     ];
     arrayObservables = [
         'gymsDefeated',
         'dungeonsCleared',
         'pokeballsUsed',
-        'pokeballsBought',
+        'pokeballsPurchased',
         'pokeballsObtained',
         'gemsGained',
         'oakItemUses',
@@ -144,6 +224,22 @@ export default class Statistics implements Saveable {
         'shinyPokemonDefeated',
         'shinyPokemonEncountered',
         'shinyPokemonHatched',
+        'malePokemonCaptured',
+        'malePokemonDefeated',
+        'malePokemonEncountered',
+        'malePokemonHatched',
+        'femalePokemonCaptured',
+        'femalePokemonDefeated',
+        'femalePokemonEncountered',
+        'femalePokemonHatched',
+        'shinyMalePokemonCaptured',
+        'shinyFemalePokemonCaptured',
+        'shinyMalePokemonDefeated',
+        'shinyFemalePokemonDefeated',
+        'shinyMalePokemonEncountered',
+        'shinyFemalePokemonEncountered',
+        'shinyMalePokemonHatched',
+        'shinyFemalePokemonHatched',
     ];
     // Observables that can be automatically generated
     autogeneratedObservables = [
@@ -181,7 +277,7 @@ export default class Statistics implements Saveable {
                 // This makes it so the stats observable can't be accidently changed
                 set: (
                     obj: Array<KnockoutObservable<number>>,
-                    prop: number,
+                    prop: any,
                     value: number,
                 ): boolean => {
                     const result = obj[prop](value);
@@ -229,7 +325,7 @@ export default class Statistics implements Saveable {
                 },
 
                 // This makes it so the stats observable can't be accidently changed
-                set: (obj: any, prop: number, value: number): boolean => {
+                set: (obj: any, prop: any, value: number): boolean => {
                     const result = obj[prop](value);
                     return result === failedSetValue;
                 },

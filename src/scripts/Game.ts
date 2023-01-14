@@ -1,6 +1,8 @@
 /// <reference path="../declarations/DataStore/BadgeCase.d.ts" />
 /// <reference path="../declarations/GameHelper.d.ts" />
 /// <reference path="../declarations/party/Category.d.ts"/>
+/// <reference path="../declarations/effectEngine/effectEngineRunner.d.ts"/>
+/// <reference path="../declarations/items/ItemHandler.d.ts"/>
 
 /**
  * Main game class.
@@ -41,7 +43,10 @@ class Game {
         public achievementTracker: AchievementTracker,
         public challenges: Challenges,
         public battleFrontier: BattleFrontier,
-        public multiplier: Multiplier
+        public multiplier: Multiplier,
+        public saveReminder: SaveReminder,
+        public battleCafe: BattleCafeSaveObject,
+        public dreamOrbController: DreamOrbController
     ) {
         this._gameState = ko.observable(GameConstants.GameState.paused);
     }
@@ -60,12 +65,18 @@ class Game {
                 console.error('Unable to load sava data from JSON for:', key, '\nError:\n', error);
             }
         });
+        saveObject.achievements?.forEach(achName => {
+            const ach = AchievementHandler.findByName(achName);
+            if (ach) {
+                ach.unlocked(true);
+            }
+        });
     }
 
     initialize() {
         AchievementHandler.initialize(this.multiplier, this.challenges);
         FarmController.initialize();
-        EffectEngineRunner.initialize(this.multiplier);
+        EffectEngineRunner.initialize(this.multiplier, GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]));
         FluteEffectRunner.initialize(this.multiplier);
         ItemHandler.initilizeEvoStones();
         this.profile.initialize();
@@ -82,13 +93,12 @@ class Game {
         AchievementHandler.preCheckAchievements();
 
         // TODO refactor to proper initialization methods
-        if (player.starter() != GameConstants.Starter.None) {
+        if (player.regionStarters[GameConstants.Region.kanto]() != GameConstants.Starter.None) {
             Battle.generateNewEnemy();
         } else {
-            const battlePokemon = new BattlePokemon('MissingNo.', 0, PokemonType.None, PokemonType.None, 0, 0, 0, 0, new Amount(0, GameConstants.Currency.money), false);
+            const battlePokemon = new BattlePokemon('MissingNo.', 0, PokemonType.None, PokemonType.None, 0, 0, 0, 0, new Amount(0, GameConstants.Currency.money), false, 0, GameConstants.BattlePokemonGender.NoGender);
             Battle.enemyPokemon(battlePokemon);
         }
-        this.farming.resetAuras();
         //Safari.load();
         Underground.energyTick(this.underground.getEnergyRegenTime());
         AchievementHandler.calculateMaxBonus(); //recalculate bonus based on active challenges
@@ -99,9 +109,13 @@ class Game {
         BerryDeal.generateDeals(now);
         Weather.generateWeather(now);
         GemDeal.generateDeals();
+        ShardDeal.generateDeals();
+        SafariPokemonList.generateSafariLists();
         RoamingPokemonList.generateIncreasedChanceRoutes(now);
 
-        this.computeOfflineEarnings();
+        if (Settings.getSetting('disableOfflineProgress').value === false) {
+            this.computeOfflineEarnings();
+        }
         this.checkAndFix();
 
         // If the player isn't on a route, they're in a town/dungeon
@@ -142,12 +156,34 @@ class Game {
 
             Notifier.notify({
                 type: NotificationConstants.NotificationOption.info,
-                title: 'Offline progress',
+                title: 'Offline Bonus',
                 message: `Defeated: ${numberOfPokemonDefeated.toLocaleString('en-US')} Pokémon\nEarned: <img src="./assets/images/currency/money.svg" height="24px"/> ${moneyToEarn.toLocaleString('en-US')}`,
-                strippedMessage: `Defeated: ${numberOfPokemonDefeated.toLocaleString('en-US')} Pokémon\nEarned: ${moneyToEarn.toLocaleString('en-US')} money`,
+                strippedMessage: `Defeated: ${numberOfPokemonDefeated.toLocaleString('en-US')} Pokémon\nEarned: ${moneyToEarn.toLocaleString('en-US')} Pokédollars`,
                 timeout: 2 * GameConstants.MINUTE,
                 setting: NotificationConstants.NotificationSetting.General.offline_earnings,
             });
+
+            // Dream orbs
+            if ((new DreamOrbTownContent()).isUnlocked()) {
+                const orbsUnlocked = App.game.dreamOrbController.orbs.filter((o) => !o.requirement || o.requirement.isCompleted());
+                const orbsEarned = Math.floor(timeDiffOverride / 3600);
+                if (orbsEarned > 0) {
+                    const orbAmounts = Object.fromEntries(orbsUnlocked.map(o => [o.color, 0]));
+                    for (let i = 0; i < orbsEarned; i++) {
+                        const orb = Rand.fromArray(orbsUnlocked);
+                        GameHelper.incrementObservable(orb.amount);
+                        orbAmounts[orb.color]++;
+                    }
+                    const messageAppend = Object.keys(orbAmounts).filter(key => orbAmounts[key] > 0).map(key => `<li>${orbAmounts[key]} ${key}</li>`).join('');
+                    Notifier.notify({
+                        type: NotificationConstants.NotificationOption.info,
+                        title: 'Dream Orbs',
+                        message: `Gained ${orbsEarned} Dream Orbs while offline:<br /><ul class="mb-0">${messageAppend}</ul>`,
+                        timeout: 2 * GameConstants.MINUTE,
+                        setting: NotificationConstants.NotificationSetting.General.offline_earnings,
+                    });
+                }
+            }
         }
     }
 
@@ -157,7 +193,7 @@ class Game {
             if (App.game.statistics.gymsDefeated[GameConstants.getGymIndex('Pewter City')]() >= 1) {
                 // Defeated Brock, Has completed the Tutorial
                 App.game.quests.getQuestLine('Tutorial Quests').state(QuestLineState.ended);
-            } else if (player.starter() >= 0) {
+            } else if (player.regionStarters[GameConstants.Region.kanto]() > GameConstants.Starter.None) {
                 // Has chosen a starter, Tutorial is started
                 App.game.quests.getQuestLine('Tutorial Quests').state(QuestLineState.started);
                 App.game.quests.getQuestLine('Tutorial Quests').beginQuest(App.game.quests.getQuestLine('Tutorial Quests').curQuest());
@@ -174,11 +210,74 @@ class Game {
                 App.game.quests.getQuestLine('Mystery of Deoxys').beginQuest(App.game.quests.getQuestLine('Mystery of Deoxys').curQuest());
             }
         }
+        // Mining expedition questline
+        if (App.game.quests.getQuestLine('Mining Expedition').state() == QuestLineState.inactive) {
+            if (App.game.party.alreadyCaughtPokemon(142)) {
+                // Has obtained Aerodactyl
+                App.game.quests.getQuestLine('Mining Expedition').state(QuestLineState.ended);
+            } else if (App.game.badgeCase.badgeList[BadgeEnums.Soul]()) {
+                // Has the soul badge, Quest is started
+                App.game.quests.getQuestLine('Mining Expedition').state(QuestLineState.started);
+                App.game.quests.getQuestLine('Mining Expedition').beginQuest(App.game.quests.getQuestLine('Mining Expedition').curQuest());
+            }
+        }
+        // Vivillon questline (if not started due to gym bug)
+        if (App.game.quests.getQuestLine('The Great Vivillon Hunt!').state() == QuestLineState.inactive) {
+            if (App.game.party.alreadyCaughtPokemon(666.01)) {
+                // Has obtained Vivillon (Pokéball)
+                App.game.quests.getQuestLine('The Great Vivillon Hunt!').state(QuestLineState.ended);
+            } else if (App.game.badgeCase.badgeList[BadgeEnums.Iceberg]()) {
+                // Has the Iceberg badge, Quest is started
+                App.game.quests.getQuestLine('The Great Vivillon Hunt!').state(QuestLineState.started);
+                App.game.quests.getQuestLine('The Great Vivillon Hunt!').beginQuest(App.game.quests.getQuestLine('The Great Vivillon Hunt!').curQuest());
+            }
+        }
+
+        // Check if Koga has been defeated, but have no safari ticket yet
+        if (App.game.badgeCase.badgeList[BadgeEnums.Soul]() && !App.game.keyItems.itemList[KeyItemType.Safari_ticket].isUnlocked()) {
+            App.game.keyItems.gainKeyItem(KeyItemType.Safari_ticket, true);
+        }
+        // Check if Giovanni has been defeated, but have no gem case yet
+        if (App.game.badgeCase.badgeList[BadgeEnums.Earth]() && !App.game.keyItems.itemList[KeyItemType.Gem_case].isUnlocked()) {
+            App.game.keyItems.gainKeyItem(KeyItemType.Gem_case, true);
+        }
+        // Check that none of our quest are less than their initial value
+        App.game.quests.questLines().filter(q => q.state() == 1 && q.curQuest() < q.quests().length).forEach(questLine => {
+            const quest = questLine.curQuestObject();
+            if (quest instanceof MultipleQuestsQuest) {
+                quest.quests.forEach((q) => {
+                    if (q.initial() > q.focus()) {
+                        q.initial(q.focus());
+                    }
+                });
+            } else {
+                if (quest.initial() > quest.focus()) {
+                    quest.initial(quest.focus());
+                    questLine.curQuestInitial(quest.initial());
+                }
+            }
+        });
+        // Check for breeding pokemons not in queue
+        const breeding = [...App.game.breeding.eggList.map((l) => l().pokemon), ...App.game.breeding.queueList()];
+        App.game.party._caughtPokemon().filter((p) => p.breeding).forEach((p) => {
+            if (!breeding.includes(p.id)) {
+                p.breeding = false;
+            }
+        });
+        // Egg partyPokemon requires App.game.party and cannot be set until after loading is complete
+        App.game.breeding.eggList.filter(e => e().pokemon).forEach(e => {
+            e().setPartyPokemon();
+        });
+
+        // Kick player out of Client Island if they are not on the client
+        if (!App.isUsingClient && player._townName === 'Client Island') {
+            MapHelper.moveToTown('One Island');
+        }
     }
 
     start() {
         console.log(`[${GameConstants.formatDate(new Date())}] %cGame started`, 'color:#2ecc71;font-weight:900;');
-        if (player.starter() === GameConstants.Starter.None) {
+        if (player.regionStarters[GameConstants.Region.kanto]() === GameConstants.Starter.None) {
             StartSequenceRunner.start();
         }
 
@@ -238,12 +337,16 @@ class Game {
             // use a setTimeout to queue the event
             this.worker?.addEventListener('message', () => Settings.getSetting('useWebWorkerForGameTicks').value ? this.gameTick() : null);
 
-            // Let our worker know if the page is visible or not
             document.addEventListener('visibilitychange', () => {
+                // Let our worker know if the page is visible or not
                 if (pageHidden != document.hidden) {
                     pageHidden = document.hidden;
                     this.worker.postMessage({'pageHidden': pageHidden});
                 }
+
+                // Save resources by not displaying updates if game is not currently visible
+                const gameEl = document.getElementById('game');
+                document.hidden ? gameEl.classList.add('hidden') : gameEl.classList.remove('hidden');
             });
             this.worker.postMessage({'pageHidden': pageHidden});
             if (this.worker) {
@@ -321,8 +424,22 @@ class Game {
             const old = new Date(player._lastSeen);
             const now = new Date();
 
+
             // Check if it's a new day
             if (old.toLocaleDateString() !== now.toLocaleDateString()) {
+                // Time traveller flag
+                if (old > now) {
+                    Notifier.notify({
+                        title: 'Welcome Time Traveller!',
+                        message: `Please ensure you keep a backup of your old save as travelling through time can cause some serious problems.
+                        
+                        Any Pokémon you may have obtained in the future could cease to exist which could corrupt your save file!`,
+                        type: NotificationConstants.NotificationOption.danger,
+                        timeout: GameConstants.HOUR,
+                    });
+                    player._timeTraveller = true;
+                }
+
                 SeededDateRand.seedWithDate(now);
                 // Give the player a free quest refresh
                 this.quests.freeRefresh(true);
@@ -338,6 +455,10 @@ class Game {
                         timeout: 3e4,
                     });
                 }
+                // Give the players more Battle Cafe spins
+                BattleCafeController.spinsLeft(BattleCafeController.spinsPerDay());
+
+                DayOfWeekRequirement.date(now.getDay());
             }
 
             // Check if it's a new hour
@@ -379,6 +500,12 @@ class Game {
         GameHelper.counter += GameConstants.TICK_TIME;
         if (GameHelper.counter >= GameConstants.MINUTE) {
             GameHelper.tick();
+        }
+
+        // Check our save reminder once every 5 minutes
+        SaveReminder.counter += GameConstants.TICK_TIME;
+        if (SaveReminder.counter >= 5 * GameConstants.MINUTE) {
+            SaveReminder.tick();
         }
     }
 

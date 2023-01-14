@@ -14,13 +14,14 @@ class StartSequenceRunner {
         AchievementHandler.load();
         App.game.quests.getQuestLine('Tutorial Quests').beginQuest(0);
         this.starterPicked = s;
-        $('#pickStarterModal').modal('hide');
-        const dataPokemon = PokemonHelper.getPokemonByName(GameConstants.Starter[this.starterPicked]);
+        $('#pickStarterTutorialModal').modal('hide');
+        const dataPokemon = PokemonHelper.getPokemonById(GameConstants.RegionalStarters[GameConstants.Region.kanto][this.starterPicked]);
         const shiny: boolean = PokemonFactory.generateShiny(GameConstants.SHINY_CHANCE_BATTLE);
+        const gender = PokemonFactory.generateGender(dataPokemon.gender.femaleRatio, dataPokemon.gender.type);
 
         App.game.gameState = GameConstants.GameState.fighting;
 
-        const battlePokemon = new BattlePokemon(dataPokemon.name, dataPokemon.id, dataPokemon.type1, dataPokemon.type2, 10, 1, 100, 0, new Amount(0, GameConstants.Currency.money), shiny);
+        const battlePokemon = new BattlePokemon(dataPokemon.name, dataPokemon.id, dataPokemon.type1, dataPokemon.type2, 10, 1, 100, 0, new Amount(0, GameConstants.Currency.money), shiny, 0, gender);
         Battle.enemyPokemon(battlePokemon);
 
         // Show the help information text
@@ -38,7 +39,7 @@ class StartSequenceRunner {
             if (battlePokemon.health() <= 0) {
                 setTimeout(() => {
                     Information.hide();
-                    player.starter(StartSequenceRunner.starterPicked);
+                    player.regionStarters[GameConstants.Region.kanto](StartSequenceRunner.starterPicked);
                     App.game.profile.pokemon(dataPokemon.id);
                     StartSequenceRunner.showCaughtMessage();
                 }, 1000);
@@ -65,21 +66,21 @@ class StartSequenceRunner {
 
 document.addEventListener('DOMContentLoaded', () => {
     $('#startSequenceModal').on('hidden.bs.modal', () => {
-        $('#pickStarterModal').modal('show');
+        $('#pickStarterTutorialModal').modal('show');
     });
 
-    $('#pickStarterModal').on('hidden.bs.modal', () => {
+    $('#pickStarterTutorialModal').on('hidden.bs.modal', () => {
         if (StartSequenceRunner.starterPicked == GameConstants.Starter.None) {
             StartSequenceRunner.noStarterCount++;
             const startersCount = StartSequenceRunner.noStarterCount >= 5 ? 'four' : 'three';
-            $('#pickStarterModalText').text(`I can't hold off all ${startersCount}! Please pick the Pokémon you want to fight!`);
-            $('#pickStarterModal').modal('show');
+            $('#pickStarterTutorialModalText').text(`I can't hold off all ${startersCount}! Please pick the Pokémon you want to fight!`);
+            $('#pickStarterTutorialModal').modal('show');
             if (StartSequenceRunner.noStarterCount == 5) {
                 // Add Pikachu to the selections
                 $('#starterSelection').append(`<div class="col">
                         <input class="image-starter" type="image"
                            src="assets/images/pokemon/25.png"
-                           onclick="StartSequenceRunner.pickStarter(GameConstants.Starter.Pikachu)">
+                           onclick="StartSequenceRunner.pickStarter(GameConstants.Starter.Special)">
                     </div>`);
             }
         }

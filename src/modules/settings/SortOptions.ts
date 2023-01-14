@@ -1,5 +1,3 @@
-import { BREEDING_ATTACK_BONUS } from '../GameConstants';
-
 export enum SortOptions {
     id = 0,
     name = 1,
@@ -11,7 +9,8 @@ export enum SortOptions {
     eggCycles = 7,
     timesHatched = 8,
     category = 9,
-    proteinsUsed = 10,
+    vitaminsUsed = 10,
+    evs = 11,
 }
 
 export type SortOptionConfig = {
@@ -34,12 +33,12 @@ export const SortOptionConfigs: Record<SortOptions, SortOptionConfig> = {
 
     [SortOptions.name]: {
         text: 'Name',
-        getValue: (p) => p.name,
+        getValue: (p) => p.displayName,
     },
 
     [SortOptions.attack]: {
         text: 'Attack',
-        getValue: (p) => p.calculateAttack(),
+        getValue: (p) => p.attack,
     },
 
     [SortOptions.level]: {
@@ -59,12 +58,12 @@ export const SortOptionConfigs: Record<SortOptions, SortOptionConfig> = {
 
     [SortOptions.breedingEfficiency]: {
         text: 'Breeding Efficiency',
-        getValue: (p) => ((p.baseAttack * (BREEDING_ATTACK_BONUS / 100) + p.proteinsUsed()) / pokemonMap[p.name].eggCycles),
+        getValue: (p) => p.breedingEfficiency(),
     },
 
     [SortOptions.eggCycles]: {
         text: 'Egg Steps',
-        getValue: (p) => pokemonMap[p.name].eggCycles,
+        getValue: (p) => p.getEggSteps(),
     },
 
     [SortOptions.timesHatched]: {
@@ -78,8 +77,13 @@ export const SortOptionConfigs: Record<SortOptions, SortOptionConfig> = {
         invert: true,
     },
 
-    [SortOptions.proteinsUsed]: {
-        text: 'Proteins Used',
-        getValue: (p) => p.proteinsUsed() || 0,
+    [SortOptions.vitaminsUsed]: {
+        text: 'Vitamins Used',
+        getValue: (p) => p.totalVitaminsUsed() || 0,
+    },
+
+    [SortOptions.evs]: {
+        text: 'EVs',
+        getValue: (p) => p.evs() || 0,
     },
 };

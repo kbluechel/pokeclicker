@@ -10,8 +10,10 @@
 
 /* Dark themes */
 .cyborg, .darkly, .slate, .superhero {
-  // make pokeball image lighter
-  img[src="assets/images/pokeball/None.svg"] {
+  // make pokeball and mute/unmute images lighter
+  img[src="assets/images/pokeball/None.svg"],
+  img[src="assets/images/volume-high.svg"],
+  img[src="assets/images/volume-xmark.svg"] {
     filter: invert(1) brightness(90%);
   }
 
@@ -20,6 +22,10 @@
     -webkit-filter: brightness(0%) invert(100%); /* Safari 6.0 - 9.0 */
     filter: brightness(0%) invert(100%);
     opacity: 0.3;
+  }
+
+  code {
+      color: #f291bf;
   }
 }
 
@@ -39,6 +45,23 @@
 .darkly {
   .text-primary, .text-light {
     color: whitesmoke !important;
+  }
+}
+
+.lux {
+  // Font was too large, covering other ui elements
+  .pageItemFooter {
+    font-size: 12px !important;
+  }
+  .pageItemTitle {
+    font-size: 30px !important;
+  }
+}
+
+.materia {
+  // Fixes button floating away on this theme
+  .stop-auto {
+    position: absolute;
   }
 }
 
@@ -80,6 +103,12 @@
   .modal-header {
     border-radius: 0px;
   }
+
+  .pageItemFooter {
+    // Font was not visible on the footer of battle-views
+    color: rgba(0, 0, 0);
+    font-weight: 700;
+  }
 }
 
 .slate {
@@ -103,6 +132,11 @@
   // Main page
   .card.border-secondary {
     color: #ddd;
+  }
+
+  // make Modal Headers lighter
+  .modal-header {
+    color: whitesmoke
   }
 }
 

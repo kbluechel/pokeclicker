@@ -34,6 +34,7 @@ try {
 // use our config settings or default values if the key doesn't exist
 config = Object.assign({
     CNAME: false,
+    DEVELOPMENT: (() => process.env.NODE_ENV != 'production')(),
     GOOGLE_ANALYTICS_INIT: false,
     GOOGLE_ANALYTICS_ID: false,
     DEV_BANNER: false,
@@ -41,6 +42,7 @@ config = Object.assign({
     FEATURE_FLAGS: {
         preloadUnreleasedTowns: false,
     },
+    TRANSLATIONS_URL: 'https://translations.pokeclicker.com',
 }, config);
 
 const escapeRegExp = (string) => {
@@ -72,6 +74,7 @@ const srcs = {
     ejsTemplates: ['src/templates/*.ejs'],
     styles: 'src/styles/**/*.less',
     assets: 'src/assets/**/*',
+    locales: 'src/translations/locales/**/*',
     libs: [
         'node_modules/bootstrap/dist/js/bootstrap.min.js',
         'node_modules/bootstrap/dist/css/bootstrap.min.css',
@@ -95,6 +98,7 @@ const dests = {
     scripts: 'build/scripts/',
     declarations: 'src/declarations/',
     styles: 'build/styles/',
+    locales: 'build/locales/',
     githubPages: 'docs/',
 };
 
@@ -114,15 +118,22 @@ gulp.task('assets', () => gulp.src(srcs.assets)
     .pipe(gulp.dest(dests.assets))
     .pipe(browserSync.reload({stream: true})));
 
+gulp.task('locales', () => gulp.src(srcs.locales)
+    .pipe(changed(dests.locales))
+    .pipe(gulp.dest(dests.locales))
+    .pipe(browserSync.reload({stream: true})));
+
 gulp.task('browserSync', () => {
     browserSync({
         server: {
             baseDir: dests.base,
         },
+        ghostMode: false,
     });
     gulp.watch(srcs.html, gulp.series('compile-html'));
     gulp.watch(srcs.ejsTemplates, gulp.series('compile-html'));
     gulp.watch(srcs.assets, gulp.series('assets'));
+    gulp.watch(srcs.locales, gulp.series('locales'));
     gulp.watch(srcs.scripts, gulp.series('scripts'));
     gulp.watch(srcs.styles, gulp.series('styles'));
 });
@@ -137,10 +148,9 @@ gulp.task('compile-html', (done) => {
     stream.pipe(plumber())
         .pipe(gulpImport('./src/components/'))
         .pipe(replace('$VERSION', version))
+        .pipe(replace('$DEVELOPMENT', !!config.DEVELOPMENT))
         .pipe(replace('$GOOGLE_ANALYTICS_INIT', !!config.GOOGLE_ANALYTICS_INIT))
         .pipe(replace('$GOOGLE_ANALYTICS_ID', config.GOOGLE_ANALYTICS_ID))
-        .pipe(replace('$GIT_BRANCH', process.env.GIT_BRANCH))
-        .pipe(replace('$DEV_DESCRIPTION', process.env.DEV_DESCRIPTION !== undefined ? process.env.DEV_DESCRIPTION : ''))
         .pipe(replace('$FEATURE_FLAGS', process.env.NODE_ENV === 'production' ? '{}' : JSON.stringify(config.FEATURE_FLAGS)))
         .pipe(ejs())
         .pipe(gulp.dest(htmlDest))
@@ -185,6 +195,8 @@ gulp.task('scripts', () => {
     const compileModules = base
         // Exclude declaration files
         .pipe(filter((vinylPath) => !vinylPath.relative.startsWith(osPathPrefix)))
+        .pipe(replace('$DEVELOPMENT', !!config.DEVELOPMENT))
+        .pipe(replace('$TRANSLATIONS_URL', config.TRANSLATIONS_URL))
         .pipe(gulp.dest(dests.scripts));
 
     // Run the tasks for the new modules
@@ -233,7 +245,7 @@ gulp.task('cname', (done) => {
 });
 
 gulp.task('build', done => {
-    gulp.series('copy', 'assets', 'compile-html', 'scripts', 'styles')(done);
+    gulp.series('copy', 'assets', 'locales', 'compile-html', 'scripts', 'styles')(done);
 });
 
 gulp.task('website', done => {

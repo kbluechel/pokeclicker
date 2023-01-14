@@ -15,11 +15,19 @@ class Save {
     }
 
     public static getSaveObject() {
-        const saveObject = {};
+        const saveObject = {achievements : []};
 
         Object.keys(App.game).filter(key => App.game[key].saveKey).forEach(key => {
             saveObject[App.game[key].saveKey] = App.game[key].toJSON();
         });
+        AchievementHandler.achievementList.forEach(achievement => {
+            if (achievement.stored && achievement.unlocked()) {
+                saveObject.achievements.push(achievement.name);
+            }
+        });
+        if (!saveObject.achievements.length) {
+            delete saveObject.achievements;
+        }
 
         return saveObject;
     }
@@ -47,8 +55,8 @@ class Save {
             const element = document.createElement('a');
             element.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(btoa(JSON.stringify(backupSaveData)))}`);
             const datestr = GameConstants.formatDate(new Date());
-            const filename = `[v${App.game.update.version}] PokeClickerSave_${datestr}.txt`;
-            element.setAttribute('download', filename);
+            const filename = Settings.getSetting('saveFilename').value ? Settings.getSetting('saveFilename').value : Settings.getSetting('saveFilename').defaultValue;
+            element.setAttribute('download', GameHelper.saveFileName(filename, {'{date}' : datestr, '{version}' : App.game.update.version, '{name}' : App.game.profile.name()}));
 
             element.style.display = 'none';
             document.body.appendChild(element);
@@ -56,6 +64,8 @@ class Save {
             element.click();
 
             document.body.removeChild(element);
+
+            App.game.saveReminder.lastDownloaded(App.game.statistics.secondsPlayed());
         } catch (err) {
             console.error('Error trying to download save', err);
             Notifier.notify({
@@ -68,6 +78,16 @@ class Save {
                 localStorage.backupSave = JSON.stringify(backupSaveData);
             } catch (e) {}
         }
+    }
+
+    public static copySaveToClipboard() {
+        const backupSaveData = {player, save: this.getSaveObject(), settings: Settings.toJSON()};
+        navigator.clipboard.writeText(btoa(JSON.stringify(backupSaveData)));
+        Notifier.notify({
+            title: 'Save copied',
+            message: 'Please paste the clipboard contents into a new \'.txt\' file.',
+            type: NotificationConstants.NotificationOption.info,
+        });
     }
 
     public static async delete(): Promise<void> {
@@ -135,7 +155,7 @@ class Save {
                     res[item] = [];
                     res[item][GameConstants.TypeEffectiveness.Immune] = ko.observable(0);
                     res[item][GameConstants.TypeEffectiveness.NotVery] = ko.observable(0);
-                    res[item][GameConstants.TypeEffectiveness.Normal] = ko.observable(0);
+                    res[item][GameConstants.TypeEffectiveness.Neutral] = ko.observable(0);
                     res[item][GameConstants.TypeEffectiveness.Very] = ko.observable(0);
                 }
             }

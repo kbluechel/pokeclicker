@@ -33,7 +33,8 @@ class DailyDeal {
     }
 
     private static randomItem(): UndergroundItem {
-        return SeededRand.fromArray(UndergroundItem.list);
+        // Exclude mega stones from daily deals
+        return SeededRand.fromArray(UndergroundItems.list.filter(item => item.valueType !== UndergroundItemValueType.MegaStone));
     }
 
     private static randomAmount(): number {
@@ -48,7 +49,11 @@ class DailyDeal {
             return false;
         }
 
-        if (this.item1.isStone()) {
+        // Left side item cannot be Evolution Item or Shard
+        if (
+            this.item1.valueType == UndergroundItemValueType.EvolutionItem
+            || this.item1.valueType == UndergroundItemValueType.Shard
+        ) {
             return false;
         }
 

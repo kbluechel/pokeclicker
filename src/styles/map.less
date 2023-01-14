@@ -10,11 +10,6 @@
     pointer-events: none;
   }
 
-  .currentLocation {
-    fill: var(--currentPlace);
-    opacity: 0.5;
-  }
-
   .locked {
     fill: var(--locked);
     opacity: 0.5;
@@ -50,6 +45,11 @@
     opacity: 0.6;
   }
 
+  .missingResistant {
+    fill: var(--missingResistant);
+    opacity: 0.6;
+  }
+
   .completed {
     fill: var(--completed);
     opacity: 0.6;
@@ -60,6 +60,13 @@
     fill: #FFD700;
     stroke: black;
   }
+
+  .iconLocation {
+    transform-box: fill-box;
+    transform-origin: center;
+    pointer-events: none;
+  }
+
 }
 
 #mapTooltip {

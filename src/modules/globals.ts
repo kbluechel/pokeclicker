@@ -1,19 +1,30 @@
 // importing only types, as we are "allowed" to have circular type dependencies
+import type {
+    Observable as KnockoutObservable,
+    ObservableArray as KnockoutObservableArray,
+    Computed as KnockoutComputed,
+} from 'knockout';
 import type LogBook from './logbook/LogBook';
 import type BadgeCase from './DataStore/BadgeCase';
 import type Profile from './profile/Profile';
 import type Statistics from './DataStore/StatisticStore';
 import type Challenges from './challenges/Challenges';
 import type Multiplier from './multiplier/Multiplier';
-import type { Environment, GameState, Region } from './GameConstants';
-import type PokemonType from './enums/PokemonType';
-import type BagItem from './interfaces/BagItem';
-import type LevelType from './party/LevelType';
+import type {
+    Environment,
+    ExtraAchievementCategories,
+    GameState,
+    Region,
+} from './GameConstants';
 import type Wallet from './wallet/Wallet';
-import { PokemonNameType } from './pokemons/PokemonNameType';
-import PokemonCategories from './party/Category';
-import OakItems from './oakItems/OakItems';
-import OakItemLoadouts from './oakItems/OakItemLoadouts';
+import type PokemonCategories from './party/Category';
+import type OakItems from './oakItems/OakItems';
+import type OakItemLoadouts from './oakItems/OakItemLoadouts';
+import type SaveReminder from './saveReminder/SaveReminder';
+import type Translate from './translation/Translation';
+import type Achievement from './achievements/Achievement';
+import type { AchievementSortOptions } from './achievements/AchievementSortOptions';
+import type AchievementCategory from './achievements/AchievementCategory';
 
 // These types are only temporary while we are converting things to modules
 // As things are converted, we should import their types here for use,
@@ -45,7 +56,8 @@ type TmpGameType = {
     discord: any,
     achievementTracker: any,
     challenges: Challenges,
-    multiplier: Multiplier
+    multiplier: Multiplier,
+    saveReminder: SaveReminder,
 
     // There are functions we could mention too,
     // but they aren't mentioned in any modules (yet?)
@@ -53,30 +65,9 @@ type TmpGameType = {
 
 type TmpAppType = {
     game: TmpGameType,
+    isUsingClient: boolean,
+    translation: Translate,
     start: ()=>void
-};
-
-type TmpPokemonListData = {
-    id: number;
-    name: PokemonNameType;
-    nativeRegion?: Region;
-    catchRate: number;
-    evolutions?: any[]; // No Evolutions in modules yet :(
-    type: PokemonType[];
-    base: {
-        hitpoints: number;
-        attack: number;
-        specialAttack: number;
-        defense: number;
-        specialDefense: number;
-        speed: number;
-    };
-    levelType: LevelType;
-    exp: number;
-    eggCycles: number;
-    baby?: boolean;
-    attack?: number;
-    heldItem?: BagItem;
 };
 
 type TmpSaveType = {
@@ -100,19 +91,59 @@ type TmpMapHelperType = {
     travelToNextRegion: ()=>void;
 };
 
-type TmpPokemonMapProxy
-    = Record<PokemonNameType | number, TmpPokemonListData>
-    & {
-        random: (max?: number, min?: number) => TmpPokemonListData,
-        randomRegion: (max?: Region, min?: Region) => TmpPokemonListData,
-    }
-    & Array<TmpPokemonListData>;
+type TmpDungeonRunner = {
+    dungeon: {
+        name: string
+    };
+};
+
+type TmpGym = {
+    town: string;
+};
+
+type TmpGymRunner = {
+    gymObservable: () => TmpGym;
+};
+
+type TmpAchievementHandler = {
+    achievementList: Achievement[];
+    navigateIndex: KnockoutObservable<number>;
+    achievementListFiltered: KnockoutObservableArray<Achievement>;
+    numberOfTabs: KnockoutObservable<number>;
+    setNavigateIndex: (index: number) => void;
+    navigateRight: () => void;
+    navigateLeft: () => void;
+    isNavigateDirectionDisabled: (navigateBackward: boolean) => boolean;
+    calculateNumberOfTabs: () => void;
+    filter: Record<string, any>;
+    getAchievementListWithIndex: () => void;
+    cachedSortedList: Achievement[];
+    achievementSortedList: KnockoutComputed<any[]>;
+    filterAchievementList: (retainPage: boolean) => void;
+    compareBy: (option: AchievementSortOptions, direction: boolean) => (a: Achievement, b: Achievement) => number;
+    preCheckAchievements: () => void;
+    checkAchievements: () => void;
+    addAchievement: (...rest) => void;
+    calculateBonus: () => void;
+    calculateMaxBonus: () => void;
+    achievementBonus: () => number;
+    achievementBonusPercent: () => string;
+    findByName: (name: string) => Achievement;
+    _achievementCategories: AchievementCategory[];
+    getAchievementCategories: () => AchievementCategory[]
+    getAchievementCategoryByRegion: (region: Region) => AchievementCategory;
+    getAchievementCategoryByExtraCategory: (category: ExtraAchievementCategories) => AchievementCategory;
+    initialize: (multiplier: Multiplier, challenges: Challenges) => void;
+    load: ()=>void
+};
 
 // Where all the magic happens
 declare global {
     const App: TmpAppType;
-    const pokemonMap: TmpPokemonMapProxy;
     const player: any;
     const Save: TmpSaveType;
     const MapHelper: TmpMapHelperType;
+    const DungeonRunner: TmpDungeonRunner;
+    const GymRunner: TmpGymRunner;
+    const AchievementHandler: TmpAchievementHandler;
 }

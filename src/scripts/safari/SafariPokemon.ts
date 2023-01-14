@@ -6,6 +6,7 @@ class SafariPokemon implements PokemonInterface {
     shiny: boolean;
     baseCatchFactor: number;
     baseEscapeFactor: number;
+    gender: number;
 
     // Used for overworld sprites
     x = 0;
@@ -16,33 +17,7 @@ class SafariPokemon implements PokemonInterface {
     private _angry: KnockoutObservable<number>;
     private _eating: KnockoutObservable<number>;
     private _eatingBait: KnockoutObservable<BaitType>;
-
-    // Lower weighted pokemon will appear less frequently, equally weighted are equally likely to appear
-    static readonly list: {
-        name: PokemonNameType,
-        weight: number
-    }[] = [
-        { name: 'Nidoran(F)', weight: 15 },
-        { name: 'Nidorina', weight: 10 },
-        { name: 'Nidoran(M)', weight: 25 },
-        { name: 'Nidorino', weight: 10 },
-        { name: 'Exeggcute', weight: 20 },
-        { name: 'Paras', weight: 5 },
-        { name: 'Parasect', weight: 15 },
-        { name: 'Rhyhorn', weight: 10 },
-        { name: 'Chansey', weight: 4 },
-        { name: 'Scyther', weight: 4 },
-        { name: 'Pinsir', weight: 4 },
-        { name: 'Kangaskhan', weight: 15 },
-        { name: 'Tauros', weight: 10 },
-        { name: 'Cubone', weight: 10 },
-        { name: 'Marowak', weight: 5 },
-        { name: 'Tangela', weight: 4 },
-    ];
-
-    public static calcPokemonWeight(pokemon): number {
-        return pokemon.weight * (App.game.party.alreadyCaughtPokemonByName(pokemon.name) ? 1 : 2);
-    }
+    private _displayName: KnockoutObservable<string>;
 
     constructor(name: PokemonNameType) {
         const data = PokemonHelper.getPokemonByName(name);
@@ -52,15 +27,13 @@ class SafariPokemon implements PokemonInterface {
         this.type1 = data.type1;
         this.type2 = data.type2;
         this.shiny = PokemonFactory.generateShiny(GameConstants.SHINY_CHANCE_SAFARI);
-        GameHelper.incrementObservable(App.game.statistics.pokemonEncountered[this.id]);
-        GameHelper.incrementObservable(App.game.statistics.totalPokemonEncountered);
-
+        this._displayName = PokemonHelper.displayName(name);
+        this.gender = PokemonFactory.generateGender(data.gender.femaleRatio, data.gender.type);
+        PokemonHelper.incrementPokemonStatistics(this.id, GameConstants.PokemonStatisticsType.Encountered, this.shiny, this.gender);
+        // Shiny
         if (this.shiny) {
-            GameHelper.incrementObservable(App.game.statistics.shinyPokemonEncountered[this.id]);
-            GameHelper.incrementObservable(App.game.statistics.totalShinyPokemonEncountered);
-
             Notifier.notify({
-                message: `✨ You encountered a shiny ${name}! ✨`,
+                message: `✨ You encountered a shiny ${this.displayName}! ✨`,
                 type: NotificationConstants.NotificationOption.warning,
                 sound: NotificationConstants.NotificationSound.General.shiny_long,
                 setting: NotificationConstants.NotificationSetting.General.encountered_shiny,
@@ -75,6 +48,10 @@ class SafariPokemon implements PokemonInterface {
         this._angry = ko.observable(0);
         this._eating = ko.observable(0);
         this._eatingBait = ko.observable(BaitType.Bait);
+    }
+
+    public static calcPokemonWeight(pokemon): number {
+        return pokemon.weight * (App.game.party.alreadyCaughtPokemonByName(pokemon.name) ? 1 : 2);
     }
 
     public get catchFactor(): number {
@@ -133,7 +110,15 @@ class SafariPokemon implements PokemonInterface {
     }
 
     public static random() {
-        const pokemon = Rand.fromWeightedArray(SafariPokemon.list, SafariPokemon.list.map(p => p.weight));
+        // Get a random pokemon from current region and zone for Safari Zone
+        const pokemon = Rand.fromWeightedArray(
+            SafariPokemonList.list[Safari.activeRegion()]()[Safari.activeZone()].safariPokemon,
+            SafariPokemonList.list[Safari.activeRegion()]()[Safari.activeZone()].safariPokemon.map(p => p.weight)
+        );
         return new SafariPokemon(pokemon.name);
+    }
+
+    public get displayName() {
+        return this._displayName();
     }
 }

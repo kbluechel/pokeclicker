@@ -7,15 +7,17 @@ export default class Challenges implements Saveable {
     defaults: Record<string, any> = {};
 
     list: Record<string, Challenge> = {
-        regionalAttackDebuff: new Challenge('Regional Attack Debuff (recommended)', 'Lowers Pokémon attack based on native region and highest reached region', true),
-        requireCompletePokedex: new Challenge('Require Complete Pokédex (recommended)', 'Requires a complete regional pokédex before moving on to the next region', true),
+        regionalAttackDebuff: new Challenge('Regional Attack Debuff (recommended)', 'Lowers Pokémon attack based on native region and highest-reached region', true),
+        requireCompletePokedex: new Challenge('Require Complete Pokédex (recommended)', 'Requires a complete regional Pokédex before moving on to the next region', true),
         disableClickAttack: new Challenge('No Click Attack', 'Disables the ability to use Click Attacks'),
         disablePokemonAttack: new Challenge('No Pokemon Attack', 'Caught Pokemon wont attack, but you get a bonus to your click attack'),
         disableBattleItems: new Challenge('No Battle Item', 'Disables the usage of Battle Items'),
-        disableMasterballs: new Challenge('No Masterball', 'Disables the usage of Masterballs'),
+        disableMasterballs: new Challenge('No Master Ball', 'Disables the usage of Master Balls'),
         disableOakItems: new Challenge('No Oak Item', 'Disables the usage of all Oak Items'),
         disableGems: new Challenge('No Gem', 'Disables the usage of Gems for increasing damage multipliers'),
-        disableProteins: new Challenge('No Protein', 'Disables the usage of Proteins'),
+        disableVitamins: new Challenge('No Vitamins', 'Disables the usage of Vitamins'),
+        slowEVs: new Challenge('Slow EVs', 'Gain EVs 10x slower'),
+        realEvolutions: new Challenge('Real evolutions', 'Your Pokémon go away, when they evolve'),
     };
 
     fromJSON(json): void {

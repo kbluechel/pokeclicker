@@ -2,7 +2,6 @@
 /// <reference path="../GameConstants.d.ts" />
 
 enum areaStatus {
-    currentLocation,
     locked,
     unlockedUnfinished,
     questAtLocation,
@@ -10,6 +9,7 @@ enum areaStatus {
     uncaughtShinyPokemonAndMissingAchievement,
     uncaughtShinyPokemon,
     missingAchievement,
+    missingResistant,
     completed,
 }
 
@@ -51,7 +51,7 @@ class MapHelper {
             });
 
             Notifier.notify({
-                message: `You don't have access to that route yet.\n${reqsList.join('\n')}`,
+                message: `You don't have access to that route yet.\n<i>${reqsList.join('\n')}</i>`,
                 type: NotificationConstants.NotificationOption.warning,
             });
         }
@@ -61,8 +61,8 @@ class MapHelper {
         return !!Routes.getRoute(region, route);
     }
 
-    public static normalizeRoute(route: number, region: GameConstants.Region): number {
-        return Routes.normalizedNumber(region, route);
+    public static normalizeRoute(route: number, region: GameConstants.Region, skipIgnoredRoutes = true): number {
+        return Routes.normalizedNumber(region, route, skipIgnoredRoutes);
     }
 
     public static accessToRoute = function (route: number, region: GameConstants.Region) {
@@ -70,7 +70,10 @@ class MapHelper {
     };
 
     public static getCurrentEnvironment(): GameConstants.Environment {
-        const area = player.route() || player.town()?.name || undefined;
+        const area = player.route() ||
+            (App.game.gameState == GameConstants.GameState.temporaryBattle ? TemporaryBattleRunner.battleObservable()?.parent?.name ?? TemporaryBattleRunner.battleObservable()?.optionalArgs.returnTown : undefined) ||
+            player.town()?.name ||
+            undefined;
 
         const [env] = Object.entries(GameConstants.Environments).find(
             ([, regions]) => regions[player.region]?.has(area)
@@ -86,9 +89,7 @@ class MapHelper {
     public static calculateRouteCssClass(route: number, region: GameConstants.Region): string {
         let cls = '';
 
-        if (player.route() == route && player.region == region) {
-            cls = areaStatus[areaStatus.currentLocation];
-        } else if (!MapHelper.accessToRoute(route, region)) {
+        if (!MapHelper.accessToRoute(route, region)) {
             cls = areaStatus[areaStatus.locked];
         } else  if (App.game.statistics.routeKills[region][route]() < GameConstants.ROUTE_KILLS_NEEDED) {
             cls = areaStatus[areaStatus.unlockedUnfinished];
@@ -102,6 +103,8 @@ class MapHelper {
             cls = areaStatus[areaStatus.uncaughtShinyPokemon];
         } else if (!RouteHelper.isAchievementsComplete(route, region)) {
             cls = areaStatus[areaStatus.missingAchievement];
+        } else if (RouteHelper.minPokerus(RouteHelper.getAvailablePokemonList(route, region, true)) < GameConstants.Pokerus.Resistant) {
+            cls = areaStatus[areaStatus.missingResistant];
         } else {
             cls = areaStatus[areaStatus.completed];
         }
@@ -114,10 +117,21 @@ class MapHelper {
         return cls;
     }
 
+    public static isRouteCurrentLocation(route: number, region: GameConstants.Region): boolean {
+        return player.route() == route && player.region == region;
+    }
+
+    public static isTownCurrentLocation(townName: string): boolean {
+        if (App.game.gameState == GameConstants.GameState.temporaryBattle) {
+            return TemporaryBattleRunner.battleObservable().getTown().name == townName;
+        }
+        return !player.route() && player.town().name == townName;
+    }
+
     public static calculateTownCssClass(townName: string): string {
-        // Check if we are currently at this location
-        if (!player.route() && player.town().name == townName) {
-            return areaStatus[areaStatus.currentLocation];
+        // We don't want to spoil easter eggs with map colors
+        if (TownList[townName]?.ignoreAreaStatus) {
+            return '';
         }
         // Check if this location is locked
         if (!MapHelper.accessToTown(townName)) {
@@ -127,25 +141,34 @@ class MapHelper {
         // Is this location a dungeon
         if (dungeonList[townName]) {
             if (!App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(townName)]()) {
-                return areaStatus[areaStatus.unlockedUnfinished];
-            } else  if (DungeonRunner.isThereQuestAtLocation(dungeonList[townName])) {
-                return areaStatus[areaStatus.questAtLocation];
+                states.push(areaStatus.unlockedUnfinished);
+            } else if (DungeonRunner.isThereQuestAtLocation(dungeonList[townName])) {
+                states.push(areaStatus.questAtLocation);
             } else if (!DungeonRunner.dungeonCompleted(dungeonList[townName], false)) {
-                return areaStatus[areaStatus.uncaughtPokemon];
+                states.push(areaStatus.uncaughtPokemon);
             } else if (!DungeonRunner.dungeonCompleted(dungeonList[townName], true) && !DungeonRunner.isAchievementsComplete(dungeonList[townName])) {
-                return areaStatus[areaStatus.uncaughtShinyPokemonAndMissingAchievement];
+                states.push(areaStatus.uncaughtShinyPokemonAndMissingAchievement);
             } else if (!DungeonRunner.dungeonCompleted(dungeonList[townName], true)) {
-                return areaStatus[areaStatus.uncaughtShinyPokemon];
+                states.push(areaStatus.uncaughtShinyPokemon);
             } else if (!DungeonRunner.isAchievementsComplete(dungeonList[townName])) {
-                return areaStatus[areaStatus.missingAchievement];
+                states.push(areaStatus.missingAchievement);
+            } else if (RouteHelper.minPokerus(dungeonList[townName].allAvailablePokemon()) < 3) {
+                states.push(areaStatus.missingResistant);
             }
         }
         const town = TownList[townName];
         town.content.forEach(c => {
-            states.push(c.areaStatus());
+            // If the town itself is not locked, it should never show locked
+            if (c.areaStatus() != areaStatus.locked) {
+                states.push(c.areaStatus());
+            }
         });
         if (states.length) {
-            return areaStatus[Math.min(...states)];
+            const importantState = Math.min(...states);
+            if (importantState >= areaStatus.uncaughtShinyPokemon && states.includes(areaStatus.uncaughtShinyPokemon) && states.includes(areaStatus.missingAchievement)) {
+                return areaStatus[areaStatus.uncaughtShinyPokemonAndMissingAchievement];
+            }
+            return areaStatus[importantState];
         }
         return areaStatus[areaStatus.completed];
     }
@@ -166,6 +189,7 @@ class MapHelper {
             Battle.catching(false);
             const town = TownList[townName];
             player.town(town);
+            player._subregion(town.subRegion);
             Battle.enemyPokemon(null);
             //this should happen last, so all the values all set beforehand
             App.game.gameState = GameConstants.GameState.town;
@@ -180,7 +204,7 @@ class MapHelper {
             });
 
             Notifier.notify({
-                message: `You don't have access to that location yet.\n${reqsList.join('\n')}`,
+                message: `You don't have access to that location yet.\n<i>${reqsList.join('\n')}</i>`,
                 type: NotificationConstants.NotificationOption.warning,
             });
         }
@@ -198,7 +222,7 @@ class MapHelper {
             openModal();
         } else {
             Notifier.notify({
-                message: 'You cannot access this dock yet',
+                message: `You cannot access this dock yet!${player.region > GameConstants.Region.kanto ? '\n<i>Progress further to return to previous regions!</i>' : ''}`,
                 type: NotificationConstants.NotificationOption.warning,
             });
         }
@@ -210,13 +234,11 @@ class MapHelper {
             return false;
         }
 
-        // Check if player doesn't require complete dex to move on to the next region and has access to next regions starter town
-        if (!App.game.challenges.list.requireCompletePokedex.active()) {
-            return TownList[GameConstants.StartingTowns[player.highestRegion() + 1]]?.isUnlocked() ?? false;
-        }
+        const challengeActive = App.game.challenges.list.requireCompletePokedex.active();
+        const nextStartingTownUnlocked = TownList[GameConstants.StartingTowns[player.highestRegion() + 1]]?.isUnlocked() ?? false;
+        const fullDex = AchievementHandler.findByName(`${GameConstants.camelCaseToString(GameConstants.Region[player.highestRegion()])} Master`).isCompleted();
 
-        // Check if all regional pokemon are obtained
-        return AchievementHandler.findByName(`${GameConstants.camelCaseToString(GameConstants.Region[player.highestRegion()])} Master`).isCompleted();
+        return nextStartingTownUnlocked && (fullDex || !challengeActive);
     }
 
     public static travelToNextRegion() {
@@ -234,7 +256,13 @@ class MapHelper {
             // Gather users attack when they moved regions
             LogEvent('attack measurement', 'new region',
                 GameConstants.Region[player.highestRegion()],
-                App.game.party.calculatePokemonAttack(undefined, undefined, true, undefined, true, false, false));
+                App.game.party.calculatePokemonAttack(undefined, undefined, true, undefined, true, false, WeatherType.Clear));
+            // Update hatchery region filter to include new region if all previous regions selected
+            if (BreedingFilters.region.value() == (2 << player.highestRegion() - 1) - 1) {
+                BreedingFilters.region.value((2 << player.highestRegion()) - 1);
+                Settings.setSettingByName('breedingRegionFilter', BreedingFilters.region.value());
+            }
+            $('#pickStarterModal').modal('show');
         }
     }
 
