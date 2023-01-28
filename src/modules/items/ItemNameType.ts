@@ -24,6 +24,7 @@ export type ItemNameType
     | 'MediumRestore'
     | 'LargeRestore'
     | 'Dungeon_ticket'
+    | 'Auto_clicker'
     | 'Explorer_kit'
     | 'Squirtbottle'
     | 'Sprinklotad'

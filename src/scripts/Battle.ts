@@ -21,6 +21,11 @@ class Battle {
     public static tick() {
         this.counter = 0;
         this.pokemonAttack();
+        if (Settings.getSetting('useAutoClicker').value && App.game.keyItems.hasKeyItem(KeyItemType.Auto_clicker)) {
+            for (let i = 0; i < App.game.badgeCase.badgeCount() / 4; i++) {
+                this.clickAttack();
+            }
+        }
     }
 
     /**
@@ -51,16 +56,11 @@ class Battle {
         if (App.game.challenges.list.disableClickAttack.active() && player.regionStarters[GameConstants.Region.kanto]() != GameConstants.Starter.None) {
             return;
         }
-        // TODO: figure out a better way of handling this
-        // Limit click attack speed, Only allow 1 attack per 50ms (20 per second)
-        const now = Date.now();
-        if (this.lastClickAttack > now - 50) {
-            return;
-        }
-        this.lastClickAttack = now;
+
         if (!this.enemyPokemon()?.isAlive()) {
             return;
         }
+
         GameHelper.incrementObservable(App.game.statistics.clickAttacks);
         this.enemyPokemon().damage(App.game.party.calculateClickAttack(true));
         if (!this.enemyPokemon().isAlive()) {
@@ -217,6 +217,21 @@ class Battle {
 
         if (Rand.chance(p)) {
             App.game.farming.gainRandomBerry();
+        }
+
+        if (App.game.statistics.routeKills[player.region][Battle.route]() > 10000) {
+            if (Rand.chance(p * 50)) {
+                App.game.wallet.addAmount(new Amount(10, Currency.dungeonToken), false);
+                App.game.wallet.addAmount(new Amount(1, Currency.questPoint), false);
+            }
+            if (Rand.chance(p / 10)) {
+                const currencyKinds = [
+                    GameConstants.Currency.battlePoint,
+                    GameConstants.Currency.diamond,
+                    GameConstants.Currency.farmPoint,
+                ];
+                App.game.wallet.addAmount(new Amount(1, currencyKinds[Math.floor(Math.random() * currencyKinds.length)]), false);
+            }
         }
     }
 
