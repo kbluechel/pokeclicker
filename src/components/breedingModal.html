@@ -15,9 +15,6 @@ aria-labelledby="breedingModalLabel" aria-hidden="true">
             <button class="btn btn-secondary" type="button" style="margin-left: 25px;" href="#categoryModal" data-toggle="modal">
                 Categories
             </button>
-            <button class="btn btn-secondary" type="button" style="margin-left: 25px;" onclick="BreedingController.fillHatchery()">
-                Fill
-            </button>
             <button type="button" class="btn btn-info"
             style="position: absolute; right: 0px; top: 0px; width: auto; height: 69px; padding: 10px;"
             data-bind="tooltip: { title: `You can trade your level 100 Pokémon for an egg of the same Pokémon. Hatched Pokémon will gain a ${GameConstants.BREEDING_ATTACK_BONUS}% bonus of their base attack and have a higher chance of becoming shiny!`, trigger: 'hover', placement:'left' }">
@@ -46,7 +43,7 @@ aria-labelledby="breedingModalLabel" aria-hidden="true">
                         <div class="form-row collapse" id="breeding-filter">
                             <div class="form-group col-md-6 col-6">
                                 <label>Search</label>
-                                <input autocomplete="off" class="form-control" oninput="BreedingFilters.search.value(new RegExp(`(${this.value})`, 'i'))" placeholder="search here"/>
+                                <input autocomplete="off" class="form-control" oninput="BreedingFilters.search.value(new RegExp(`(${/^\/.+\/$/.test(this.value) ? this.value.slice(1, -1) : GameHelper.escapeStringRegex(this.value)})`, 'i'))" placeholder="search here"/>
                             </div>
                             <div class="form-group col-md-3 col-6">
                                 <label>Category</label>

@@ -43,16 +43,10 @@ class DungeonRunner {
         // Dungeon size increases with each region
         let dungeonSize = GameConstants.BASE_DUNGEON_SIZE + (dungeon.optionalParameters.dungeonRegionalDifficulty ?? player.region);
         // Decrease dungeon size by 1 for every 10, 100, 1000 etc completes
-        const clearAmount = App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(DungeonRunner.dungeon.name)]();
-        dungeonSize -= Math.max(0, clearAmount.toString().length - 1);
-        const flash = clearAmount >= 200;
+        dungeonSize -= Math.max(0, App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(DungeonRunner.dungeon.name)]().toString().length - 1);
+        const flash = DungeonRunner.getFlash(DungeonRunner.dungeon.name);
         // Dungeon size minimum of MIN_DUNGEON_SIZE
-        if (clearAmount >= 500) {
-            DungeonRunner.map = new DungeonMap(Math.max(GameConstants.MIN_DUNGEON_SIZE, dungeonSize), false);
-            DungeonRunner.map.showAllTiles();
-        } else {
-            DungeonRunner.map = new DungeonMap(Math.max(GameConstants.MIN_DUNGEON_SIZE, dungeonSize), flash);
-        }
+        DungeonRunner.map = new DungeonMap(Math.max(GameConstants.MIN_DUNGEON_SIZE, dungeonSize), flash);
 
         DungeonRunner.chestsOpened(0);
         DungeonRunner.encountersWon(0);
@@ -318,5 +312,19 @@ class DungeonRunner {
 
     public static dungeonLevel(): number {
         return PokemonFactory.routeLevel(this.dungeon.difficultyRoute, player.region);
+    }
+
+    public static getFlash(dungeonName): DungeonFlash | undefined {
+        const clears = App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(dungeonName)]();
+
+        const config = [
+            { flash: DungeonFlash.tiers[0], clearsNeeded: 100 },
+            { flash: DungeonFlash.tiers[1], clearsNeeded: 250 },
+            { flash: DungeonFlash.tiers[2], clearsNeeded: 400 },
+        ].reverse();
+
+        // findIndex, so we can get next tier when light ball is implemented
+        const index = config.findIndex((tier) => tier.clearsNeeded <= clears);
+        return config[index]?.flash;
     }
 }

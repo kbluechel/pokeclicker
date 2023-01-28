@@ -21,21 +21,12 @@ class Battle {
     public static tick() {
         this.counter = 0;
         this.pokemonAttack();
-        if (Settings.getSetting('enableAutoClicker').value && App.game.keyItems.hasKeyItem(KeyItemType.Auto_clicker)) {
-            for (let i = 0; i < App.game.badgeCase.badgeCount() / 4; i++) {
-                this.clickAttack();
-            }
-        }
     }
 
     /**
      * Attacks with Pokémon and checks if the enemy is defeated.
      */
     public static pokemonAttack() {
-        //Pkmn attack disabled and we are not in the battle frontier
-        if (App.game.challenges.list.disablePokemonAttack.active() && App.game.gameState != GameConstants.GameState.battleFrontier) {
-            return;
-        }
         // TODO: figure out a better way of handling this
         // Limit pokemon attack speed, Only allow 1 attack per 900ms
         const now = Date.now();
@@ -60,6 +51,13 @@ class Battle {
         if (App.game.challenges.list.disableClickAttack.active() && player.regionStarters[GameConstants.Region.kanto]() != GameConstants.Starter.None) {
             return;
         }
+        // TODO: figure out a better way of handling this
+        // Limit click attack speed, Only allow 1 attack per 50ms (20 per second)
+        const now = Date.now();
+        if (this.lastClickAttack > now - 50) {
+            return;
+        }
+        this.lastClickAttack = now;
         if (!this.enemyPokemon()?.isAlive()) {
             return;
         }
@@ -179,7 +177,7 @@ class Battle {
     }
 
     public static catchPokemon(enemyPokemon: BattlePokemon, route: number, region: GameConstants.Region) {
-        App.game.wallet.gainDungeonTokens(PokemonFactory.routeDungeonTokens(route, region));
+        this.gainTokens(route, region);
         App.game.oakItems.use(OakItemType.Magic_Ball);
         App.game.party.gainPokemonById(enemyPokemon.id, enemyPokemon.shiny, undefined, enemyPokemon.gender);
         const partyPokemon = App.game.party.getPokemon(enemyPokemon.id);
@@ -187,32 +185,38 @@ class Battle {
         partyPokemon.effortPoints += App.game.party.calculateEffortPoints(partyPokemon, enemyPokemon.shiny, enemyPokemon.ep * epBonus);
     }
 
+    protected static gainTokens(route: number, region: GameConstants.Region) {
+        let currencyKinds = [GameConstants.Currency.dungeonToken];
+        if (this.pokeball() === GameConstants.Pokeball.Luxuryball) {
+            //currencyKinds = [
+            //  GameConstants.Currency.dungeonToken,
+            //  GameConstants.Currency.money,
+            //  GameConstants.Currency.questPoint,
+            //  GameConstants.Currency.diamond,
+            //  GameConstants.Currency.farmPoint,
+            //  GameConstants.Currency.battlePoint,
+            //  GameConstants.Currency.contestToken,
+            //];
+            currencyKinds = [
+                GameConstants.Currency.dungeonToken,
+                GameConstants.Currency.money,
+                GameConstants.Currency.questPoint,
+                GameConstants.Currency.diamond,
+                GameConstants.Currency.farmPoint,
+                GameConstants.Currency.battlePoint,
+            ];
+        }
+        const currencyUnits = PokemonFactory.routeDungeonTokens(route, region)
+                                / GameConstants.LuxuryBallCurrencyRate[GameConstants.Currency.dungeonToken];
+        const chosenCurrency = currencyKinds[Math.floor(Math.random() * currencyKinds.length)];
+        App.game.wallet.addAmount(new Amount(Math.ceil(currencyUnits * GameConstants.LuxuryBallCurrencyRate[chosenCurrency]), chosenCurrency), false);
+    }
+
     static gainItem() {
         const p = MapHelper.normalizeRoute(Battle.route, player.region) / 1600 + 0.009375;
 
         if (Rand.chance(p)) {
             App.game.farming.gainRandomBerry();
-        }
-
-        if (App.game.statistics.routeKills[player.region][Battle.route]() > 10000) {
-            if (Rand.chance(p / 10)) {
-                const randomReward = [
-                    'Leaf_stone', 'Fire_stone', 'Water_stone', 'Thunder_stone', 'Moon_stone', 'Trade_stone', 'Sun_stone', 'Soothe_bell',
-                    'Metal_coat', 'Kings_rock', 'Upgrade', 'Dragon_scale', 'Prism_scale', 'Deepsea_tooth', 'Deepsea_scale', 'Shiny_stone',
-                    'Dusk_stone', 'Dawn_stone', 'Razor_claw', 'Razor_fang', 'Electirizer', 'Magmarizer', 'Protector', 'Dubious_disc',
-                    'Reaper_cloth', 'Black_DNA', 'White_DNA', 'Sachet', 'Whipped_dream', 'Ice_stone', 'Fire_egg', 'Water_egg', 'Grass_egg',
-                    'Fighting_egg', 'Electric_egg', 'Dragon_egg',
-                ];
-                const item = randomReward[Math.floor(Math.random() * randomReward.length)];
-                player.gainItem(ItemList[item].name, 1);
-            }
-            App.game.wallet.gainDungeonTokens(1000, false);
-            App.game.wallet.gainQuestPoints(100, false);
-            if (Rand.chance(p)) {
-                App.game.wallet.gainFarmPoints(10, false);
-                App.game.wallet.gainBattlePoints(10, false);
-                App.game.wallet.gainDiamonds(1, false);
-            }
         }
     }
 

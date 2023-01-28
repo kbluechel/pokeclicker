@@ -275,11 +275,7 @@ class Underground implements Feature {
     gainEnergy() {
         if (this.energy < this.getMaxEnergy()) {
             const oakMultiplier = App.game.oakItems.calculateBonus(OakItemType.Cell_Battery);
-            const energyGain = this.getEnergyGain();
-            this.energy = Math.min(this.getMaxEnergy(), this.energy + (oakMultiplier * energyGain));
-            if ((this.energy + energyGain) >= this.getMaxEnergy() && Settings.getSetting('autoBomb').value) {
-                Mine.bomb();
-            }
+            this.energy = Math.min(this.getMaxEnergy(), this.energy + (oakMultiplier * this.getEnergyGain()));
             if (this.energy === this.getMaxEnergy()) {
                 Notifier.notify({
                     message: 'Your mining energy has reached maximum capacity!',

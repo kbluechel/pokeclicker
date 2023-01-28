@@ -372,10 +372,10 @@ const BigSpender = new NPC('Big Spender', [
 ], {image: 'assets/images/trainers/Beauty.png'});
 
 const EggHuntErika = new NPC('Erika', [
-    'And here comes another one. Let me guess, you\'re gonna ask me about the Togepi too?',
-    'Listen here you. Just because I\'m the Grass type gym leader doesn\'t mean I know everything that goes on in the forest! I live in one of the biggest cities in the region! With tall buildings! And gambling! And crime! I like it here! I don\'t care about the forest!',
+    'Hello... Isn\'t the spring weather so relaxing? I adore how lovely the blooming flowers look during this time of year...',
+    'Oh! I\'m sorry, I almost dozed off. I was reminiscing about my stroll in Viridian Forest earlier today. I came across the loveliest patch of flowers over there and...',
     '...',
-    'All right, fine. It just so happens that I have heard about <span style="font-style: italic">something</span> going on in Viridian Forest. But I don\'t know what, and I don\'t care! You can go figure it out! I\'m staying here! Viridian Forest doesn\'t even have any Grass types. It\'s all Bugs over there.',
+    'Zzz... Hm? Oh yes, the forest. It was most peculiar - when I laid down upon the flowerbed I had the strangest dream of a colorful, round Pokémon. At least, I think it was a dream... It did not strike me as one of the usual inhabitants of the area.',
 ], {
     image: 'assets/images/gymLeaders/Erika.png',
     requirement: new MultiRequirement([new QuestLineStartedRequirement('Togepi Egg Hunt'), new QuestLineCompletedRequirement('Togepi Egg Hunt', GameConstants.AchievementOption.less)]),
@@ -1898,6 +1898,9 @@ const FortreeCityShop = new Shop([
     ItemList.LargeRestore,
     ItemList.Leaf_stone,
 ]);
+const WindChimeShop = new Shop([
+    ItemList['Probably Chimecho'],
+], 'Shady Deal');
 const MossdeepCityShop = new Shop([
     ItemList.Pokeball,
     ItemList.Greatball,
@@ -2012,6 +2015,12 @@ const FortreeRanger = new NPC('Pokémon Ranger Catherine', [
     'Disposable Dowsing Machines! Who even came up with this?! People leave these everywhere. It\'s absolutely terrible for the environment. Some poor innocent Pokémon could choke on it!',
     'Please recycle your used Dowsing Machines.',
 ], {image: 'assets/images/npcs/Pokemon Ranger (female).png'});
+
+const WindChimeShopShadySalesman = new NPC('Shady Salesman', [
+    'Step right up! Get your Chimecho while they last! Chimecho, a very rare Pokémon indeed, with a voice that\'s both beautiful and powerful. Look closer! I see it bringing a smile to your face, just gazing into those loving eyes! They say these are the most gentle, healing eyes in the Pokémon kingdom.',
+    'That\'s not all! Just look at the way Chimecho\'s tail swings and sways with the wind, like a weeping willow in a summer breeze. In really hot weather, it will act like a fan to help you cool off. And when it\'s cold outside, your Chimecho can wrap itself around your neck like a scarf, to keep you warm.',
+    'And one more thing. It\'s not widely known, but it\'s a true fact; Chimecho are able to choose winning lottery tickets! Soo you see, my friend, just having a Chimecho with you, is a sure-fire ticket to happiness and success. Let Chimecho give you total peace and happiness, for a good price!',
+], {image: 'assets/images/npcs/ShadySalesman.png'});
 
 const Steven1 = new NPC('Steven', [
     'I have been investigating the behavior of Kecleon, the Color Swap Pokémon.',
@@ -2194,6 +2203,36 @@ const BrailleEnthusiast3 = new NPC('Braille Enthusiast', [
     requirement: new QuestLineStepCompletedRequirement('The Three Golems', 6),
 });
 
+const Television1 = new NPC('Watch Television', [
+    'Reports are coming in from across Hoenn that two fast-moving Pokémon have appeared!',
+    'These elusive Pokémon are Blue and Red and White all over, and our reporters will give you the latest updates as we try to discern their identity and location!',
+],  {requirement: new MultiRequirement([new QuestLineStartedRequirement('The Eon Duo'), new QuestLineStepCompletedRequirement('The Eon Duo', 1, GameConstants.AchievementOption.less)]),
+});
+
+const Television2 = new NPC('Watch More Television', [
+    'A hot new vacation spot is waiting for you!',
+    'Come to the Hoenn Pokémon League to claim your free Eon Ticket today!',
+    'Supplies are limited, reserve your spot on a cruise to the Southern Island!',
+],  {requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('The Eon Duo', 0), new QuestLineStepCompletedRequirement('The Eon Duo', 2, GameConstants.AchievementOption.less)]),
+});
+
+const TicketClaim = new NPC('Contest Attendant', [
+    'Thank you for reserving your Eon Ticket!',
+    'To claim the ticket, all you have to do is go to your Start Menu, select "Save", and enter the following code in the "Enter Code..." box:',
+    'EON-TICKET',
+],  {requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('The Eon Duo', 1), new QuestLineStepCompletedRequirement('The Eon Duo', 3, GameConstants.AchievementOption.less)]),
+});
+
+const SurferDave = new NPC('Surfer Dave', [
+    'What\'s up? I got here using my Eon Ticket, what about you?']
+);
+
+const SouthernIsland1 = new NPC('Explore the Southern Island', [
+    '<i>The Southern Island is a small but lush forest. The clearing near the center of the island is the perfect place for a tired Pokémon to rest.</i>',
+    '<i>Latios and Latias are resting in the clearing. You can approach one of them, but the other will probably flee.</i>',
+],  {requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('The Eon Duo', 2), new QuestLineStepCompletedRequirement('The Eon Duo', 3, GameConstants.AchievementOption.less)]),
+});
+
 //Hoenn Towns
 TownList['Littleroot Town'] = new Town(
     'Littleroot Town',
@@ -2202,7 +2241,7 @@ TownList['Littleroot Town'] = new Town(
     [new BulletinBoard(GameConstants.BulletinBoards.Hoenn)],
     {
         requirements: [new GymBadgeRequirement(BadgeEnums.Elite_JohtoChampion)],
-        npcs: [ProfBirch, LittlerootAide],
+        npcs: [ProfBirch, LittlerootAide, Television1, Television2],
     }
 );
 TownList['Oldale Town'] = new Town(
@@ -2323,6 +2362,17 @@ TownList['Fortree City'] = new Town(
         npcs: [FortreeWeatherman, FortreeRanger, Steven1, Steven2],
     }
 );
+TownList['Wind Chime Shop'] = new Town(
+    'Wind Chime Shop',
+    GameConstants.Region.hoenn,
+    GameConstants.HoennSubRegions.Hoenn,
+    [WindChimeShop],
+    {
+        requirements: [new TemporaryBattleRequirement('May 4')],
+        npcs: [WindChimeShopShadySalesman],
+        ignoreAreaStatus: true,
+    }
+);
 TownList['Lilycove City'] = new Town(
     'Lilycove City',
     GameConstants.Region.hoenn,
@@ -2390,6 +2440,17 @@ TownList['Pokémon League Hoenn'] = new Town(
             new RouteKillRequirement(10, GameConstants.Region.hoenn, 128),
             new TemporaryBattleRequirement('Wally 2'),
         ],
+        npcs: [TicketClaim],
+    }
+);
+TownList['Southern Island'] = new Town(
+    'Southern Island',
+    GameConstants.Region.hoenn,
+    GameConstants.HoennSubRegions.Hoenn,
+    [TemporaryBattleList.Latios, TemporaryBattleList.Latias],
+    {
+        requirements: [new CustomRequirement(ko.pureComputed(() => +App.game.keyItems.hasKeyItem(KeyItemType.Eon_ticket)), 1, 'Obtain an Eon Ticket')],
+        npcs: [SurferDave, SouthernIsland1],
     }
 );
 
@@ -2680,7 +2741,10 @@ const TwinleafContestChampion = new NPC('Contest Champion', [
 
 const SandgemBeachcomber = new NPC('Beachcomber', [
     'Hmmm… Oh! Sorry, I didn’t see you there! Sometimes the strangest things wash up on this beach, so I just got caught up in the search.',
-    'Just last week a weird blue egg with a red center showed up. I went to go pick it up, but then it hatched! I was so surprised that the little blue Pokémon just hopped right back into the ocean. Who knows, maybe you’ll find it roaming around the region!',
+    'Just last week a weird blue stone with a red center showed up. A rather slow-looking guy with a slowpoke found it first, and took it to the Pokémon Lab.',
+    'I think I\'ve seen that stone before - it was on a book of an old legend about the sea.',
+    'I think it went something like... "When the Prince of the Seas is born, all of his kin will come to this region to celebrate."',
+    'Does that mean when this Prince comes, Pokémon like him will start roaming the region?',
 ]);
 
 const FloaromaFlowerGirl = new NPC('Flower Girl', [
@@ -2844,6 +2908,166 @@ const LucyStevens1 = new NPC('Lucy Stevens', [
     requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Detective Pikachu', 7), new QuestLineStepCompletedRequirement('Detective Pikachu', 9, GameConstants.AchievementOption.less)]),
 });
 
+const ManaphyHastings1 = new NPC('Professor Hastings', [
+    'Ah, are you a strong trainer? I\'d like to leave this to a Pokémon Ranger, but the ones in this region are far away, and the crooks could escape by the time they caught up!',
+    'I was robbed of a precious Pokémon Egg by the Go-Rock Squad! The egg was coloured a transparent blue...  Like the colour of the sea!',
+    'The Go-Rock Squad were troublemakers the Pokémon Rangers dealt with in my home region. I don\'t know why they took it, but the Go-Rock Squad is trying to regroup!',
+    'I was robbed in the forest to the north. Please, you have to hurry!',
+], {
+    image: 'assets/images/npcs/Professor Hastings.png',
+    requirement: new MultiRequirement([new QuestLineStartedRequirement('Recover the Precious Egg!'), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 2, GameConstants.AchievementOption.less)]),
+});
+
+const ManaphyHastings2 = new NPC('Professor Hastings', [
+    'Thanks for retrieving the Egg!',
+    'The Go-Rock Squad was already beaten once. That was probably their very last gasp of trouble-making.',
+    'While you were gone I discovered that the egg belongs to Manaphy! No wonder the Go-Rock Squad was after it.',
+    'Canalave\'s Library has several books detailing the legends of Manaphy. Perhaps one of them can help us find out how to hatch this egg.',
+    'No time to waste - I\'ll see you at the Canalave Library!',
+], {
+    image: 'assets/images/npcs/Professor Hastings.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 10), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 11, GameConstants.AchievementOption.less)]),
+});
+
+const ManaphyHastings3 = new NPC('Professor Hastings', [
+    'Trainer, there\'s trouble afoot!',
+    'The egg was stolen again - this time by a Happiny who belongs to a little girl here. It went eastward at top speed - it\'s probably left this city far behind it now.',
+    'We must retrieve that egg at all costs! Please, you have to chase down the egg-napper!',
+], {
+    image: 'assets/images/npcs/Professor Hastings.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 11), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 25, GameConstants.AchievementOption.less)]),
+});
+
+const ManaphyHastings4 = new NPC('Professor Hastings', [
+    'Ah, Manaphy hatched, did it? Looks like all that running around you and Happiny did incubated it enough to hatch it.',
+    'There is something I\'ve discovered researching the Manaphy stories here. Apparently, Manaphy can be bred to produce an entirely different species of Pokémon!',
+    'Quite frankly, it\'s probably for the best if Manaphy stays with you. Apparently many things want to take that Pokémon for themselves, and I don\'t have the strength to fend them off.',
+], {
+    image: 'assets/images/npcs/Professor Hastings.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 25), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 26, GameConstants.AchievementOption.less)]),
+});
+
+const ManaphyBoulders = new NPC('Strange Boulders', [
+    '<i>One of the pathways into the forest is blocked by a trio of large boulders.</i>',
+    '<i>However, all three of the boulders look very similar... and they almost seem to have arms, as well.</i>',
+    '<i>Perhaps these aren\'t boulders after all... and if they are what you think they are, a good soaking should settle the matter.</i>',
+], {
+    image: 'assets/images/npcs/Strange Boulders.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 0), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 2, GameConstants.AchievementOption.less)]),
+});
+
+const ManaphyGoRockCommander = new NPC('Go-Rock Commander', [
+    'You... are you a Pokémon Ranger? ...No? Well, no matter.',
+    'Allow me to explain something to you. This egg is meaningful only if we possess it.',
+    'We\'re going to hatch Manaphy from this egg and get it to guide us to its Sea Temple.',
+    'With the power contained within, I will become the King of the Sea - far stronger than the old fool guiding us before!',
+    '<i>The Commander flees into the forest, with the Go-Rock Grunts covering his escape!</i>',
+], {
+    image: 'assets/images/temporaryBattle/Go-Rock Squad Commander.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 3), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 5, GameConstants.AchievementOption.less)]),
+});
+
+const ManaphyGoRock = new NPC('Go-Rock Grunt', [
+    'Huff... huff... we should have been out of the forest by now!',
+    'The plan was so simple. One of our grunts pre-planted a bunch of big red mushrooms with yellow spots to make a path out of the forest and to our hideout.',
+    'But it feels like we\'ve been going in circles! The only reason I know we aren\'t is because every time we reach a similar crossroads, the mushrooms are in different places.',
+    'Unless... the mushrooms are moving somehow?',
+    '<i>What she\'s describing... could it be they\'re using Parasect? It\'s never a good idea to use living landmarks.</i>',
+    '<i>If you can take out a few of the Parasect, that should quickly corner them.</i>',
+], {
+    image: 'assets/images/temporaryBattle/Go-Rock Squad Grunt (female).png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 6), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 8, GameConstants.AchievementOption.less)]),
+});
+
+const HappinyWitness1 = new NPC('Black Belt', [
+    'A Happiny with a blue egg?',
+    'I did see a Happiny like that. They were heading north, across Route 204.',
+], {
+    image: 'assets/images/trainers/Black Belt.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 12), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 14, GameConstants.AchievementOption.less)]),
+});
+
+const HappinyWitness2 = new NPC('Lady', [
+    'A Happiny with a blue egg? Are you its trainer?',
+    'I was just minding my own business, when a little pink thing knocked me right over! By the time I got up, it was long gone, racing for the Eterna Forest.',
+    'I was worried its trainer had lost it, so I came here to ask around. I hope you catch up to it soon.',
+    '<i>If it has a better sense of direction than the Go-Rock Squad, it\'ll probably pop out at Eterna City.</i>',
+], {
+    image: 'assets/images/trainers/Lady.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 13), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 15, GameConstants.AchievementOption.less)]),
+});
+
+const HappinyWitness3 = new NPC('Cyclist', [
+    'A Happiny with a blue egg? Ah yeah, I saw it.',
+    'It ran right through here and went across Route 211, straight for Mt. Coronet.',
+    '<i>Did the Happiny really leave Eterna and brave Mt. Coronet with the egg in tow? Maybe it\'s reached the other side by now.</i>',
+], {
+    image: 'assets/images/trainers/Cyclist (female).png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 14), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 16, GameConstants.AchievementOption.less)]),
+});
+
+const HappinyWitness4 = new NPC('Waitress', [
+    'I was just finishing up my shift at the Café Cabin when a little pink puffball ran past! It was heading south, for the ruins down there.',
+    '...Eh, it was a Happiny? ...That\'s one fast Happiny, then, isn\'t it?',
+], {
+    image: 'assets/images/npcs/Waitress.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 15), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 17, GameConstants.AchievementOption.less)]),
+});
+
+const HappinyWitness5 = new NPC('Pokémon Ranger', [
+    'Ah, you\'re the one chasing after that Happiny? You look a bit puffed, are you okay?',
+    'I tried to capture it, but it barrelled right through my Capture Disc\'s trail! It went for Hearthome City. It wasn\'t showing any signs of slowing down yet.',
+], {
+    image: 'assets/images/npcs/Pokemon Ranger (female).png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 16), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 18, GameConstants.AchievementOption.less)]),
+});
+
+const HappinyWitness6 = new NPC('Murph', [
+    'Me and my buddy Slowpoke are trying to catch a Happiny that just went running into Mt. Coronet.',
+    'It had a blue egg on its belly - I\'ve definitely seen an egg like that before, back in Fiore.',
+    'My Slowpoke\'s gone ahead, I hope I can catch up to them soon.',
+], {
+    image: 'assets/images/npcs/Murph.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 17), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 19, GameConstants.AchievementOption.less)]),
+});
+
+const HappinyWitness7 = new NPC('Cyclist', [
+    'Oh hey! Still chasing that Happiny, huh?',
+    'When I saw it still running, I tried to catch up to it, but it got into the Oreburgh Tunnel and I lost track of it.',
+    '...Say, are you alright? You look a little... bug-eyed.',
+    '<i>...This annoying little twerp has been taking you in one big loop, hasn\'t it...</i>',
+], {
+    image: 'assets/images/trainers/Cyclist (female).png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 18), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 20, GameConstants.AchievementOption.less)]),
+});
+
+const HappinyWitness8 = new NPC('Bug Catcher', [
+    'Some guy in a weird white outfit was chasing a Happiny!',
+    'They were heading south, towards Professor Rowan\'s lab!',
+    'You\'re chasing after them too, right? Good luck catching up to them!',
+], {
+    image: 'assets/images/trainers/Bug Catcher.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 19), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 21, GameConstants.AchievementOption.less)]),
+});
+
+const HappinyWitness9 = new NPC('Go-Rock Pincher', [
+    'Damn, that Happiny got away. Just when I had it cornered, a Pichu and a Glameow came out and attacked me.',
+    '...Hey, I recognize you! You pinched the egg we pinched in Eterna Forest!',
+    'I\'m gonna pinch that Pokémon first, so if you want to try and stop me, you\'ll have to get through my Pokémon!',
+], {
+    image: 'assets/images/temporaryBattle/Go-Rock Squad Grunt (male).png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 20), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 22, GameConstants.AchievementOption.less)]),
+});
+
+const HappinyBoulders = new NPC('Strange Boulders', [
+    '<i>You\'ve seen \'boulders\' like this before.</i>',
+    '<i>According to the murmuring crowd around them, a Happiny ran this way and threw the boulders behind it to block any pursuers.</i>',
+    '<i>You spray the boulders with your water types, and they... don\'t move. Huh, guess they really are boulders this time.</i>',
+    '<i>Well, that just means that you can get some fighting-types and crush them with no regrets.</i>',
+], {
+    image: 'assets/images/npcs/Strange Boulders.png',
+    requirement: new MultiRequirement([new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 22), new QuestLineStepCompletedRequirement('Recover the Precious Egg!', 24, GameConstants.AchievementOption.less)]),
+});
 
 //Sinnoh Towns
 TownList['Twinleaf Town'] = new Town(
@@ -2860,10 +3084,10 @@ TownList['Sandgem Town'] = new Town(
     'Sandgem Town',
     GameConstants.Region.sinnoh,
     GameConstants.SinnohSubRegions.Sinnoh,
-    [SandgemTownShop],
+    [SandgemTownShop, TemporaryBattleList['Manaphy Go-Rock Pincher']],
     {
         requirements: [new RouteKillRequirement(10, GameConstants.Region.sinnoh, 201)],
-        npcs: [ProfRowan, SandgemBeachcomber],
+        npcs: [ProfRowan, SandgemBeachcomber, ManaphyHastings1, ManaphyHastings2, HappinyWitness9],
     }
 );
 TownList['Jubilife City'] = new Town(
@@ -2873,6 +3097,7 @@ TownList['Jubilife City'] = new Town(
     [JubilifeCityShop],
     {
         requirements: [new RouteKillRequirement(10, GameConstants.Region.sinnoh, 202)],
+        npcs: [HappinyWitness1, HappinyWitness8],
     }
 );
 TownList['Oreburgh City'] = new Town(
@@ -2882,7 +3107,7 @@ TownList['Oreburgh City'] = new Town(
     [OreburghCityShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Oreburgh City'])],
     {
         requirements: [new ClearDungeonRequirement(1, GameConstants.getDungeonIndex('Oreburgh Gate'))],
-        npcs: [OreburghConstructionWorker],
+        npcs: [OreburghConstructionWorker, HappinyWitness7],
     }
 );
 TownList['Floaroma Town'] = new Town(
@@ -2895,7 +3120,7 @@ TownList['Floaroma Town'] = new Town(
             new RouteKillRequirement(10, GameConstants.Region.sinnoh, 204),
             new GymBadgeRequirement(BadgeEnums.Coal),
         ],
-        npcs: [FloaromaFlowerGirl],
+        npcs: [FloaromaFlowerGirl, HappinyWitness2],
     }
 );
 TownList['Eterna City'] = new Town(
@@ -2905,7 +3130,7 @@ TownList['Eterna City'] = new Town(
     [EternaCityShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Eterna City']), new MoveToDungeon(dungeonList['Team Galactic Eterna Building'])],
     {
         requirements: [new ClearDungeonRequirement(1, GameConstants.getDungeonIndex('Eterna Forest'))],
-        npcs: [EternaLassCaroline],
+        npcs: [EternaLassCaroline, HappinyWitness3],
     }
 );
 TownList['Mt. Coronet'] = new Town(
@@ -2924,7 +3149,7 @@ TownList['Hearthome City'] = new Town(
     [HearthomeCityShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Hearthome City']), SinnohBerryMaster],
     {
         requirements: [new RouteKillRequirement(10, GameConstants.Region.sinnoh, 208)],
-        npcs: [HearthomeContestFan, LucyStevens1],
+        npcs: [HearthomeContestFan, LucyStevens1, HappinyWitness6],
     }
 );
 TownList['Solaceon Town'] = new Town(
@@ -2934,6 +3159,7 @@ TownList['Solaceon Town'] = new Town(
     [SolaceonTownShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Solaceon Town'])],
     {
         requirements: [new RouteKillRequirement(10, GameConstants.Region.sinnoh, 209)],
+        npcs: [HappinyWitness5],
     }
 );
 TownList['Veilstone City'] = new Town(
@@ -2962,17 +3188,17 @@ TownList['Celestic Town'] = new Town(
     [CelesticTownShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Celestic Town']), TemporaryBattleList['Galactic Boss Cyrus']],
     {
         requirements: [new GymBadgeRequirement(BadgeEnums.Fen)],
-        npcs: [CelesticGrandma],
+        npcs: [CelesticGrandma, HappinyWitness4],
     }
 );
 TownList['Pal Park'] = new Town(
     'Pal Park',
     GameConstants.Region.sinnoh,
     GameConstants.SinnohSubRegions.Sinnoh,
-    [PalParkShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Pal Park'])],
+    [PalParkShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Pal Park']), TemporaryBattleList['Manaphy Egg Protectors']],
     {
         requirements: [new RouteKillRequirement(10, GameConstants.Region.sinnoh, 221)],
-        npcs: [PalParkWarden, PalParkBurglar],
+        npcs: [PalParkWarden, PalParkBurglar, HappinyBoulders],
     }
 );
 TownList['Canalave City'] = new Town(
@@ -2982,7 +3208,7 @@ TownList['Canalave City'] = new Town(
     [CanalaveCityShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Canalave City'])],
     {
         requirements: [new RouteKillRequirement(10, GameConstants.Region.sinnoh, 218)],
-        npcs: [CanalaveRiley, CanalaveYoungBoy, CanalaveSinnohMyth],
+        npcs: [CanalaveRiley, CanalaveYoungBoy, CanalaveSinnohMyth, ManaphyHastings3, ManaphyHastings4],
     }
 );
 TownList['Snowpoint City'] = new Town(
@@ -3070,7 +3296,11 @@ TownList['Eterna Forest'] = new DungeonTown(
     [
         new RouteKillRequirement(10, GameConstants.Region.sinnoh, 205),
         new GymBadgeRequirement(BadgeEnums.Coal),
-    ]
+    ],
+    [TemporaryBattleList['Manaphy Go-Rock MGrunt 1'], TemporaryBattleList['Manaphy Go-Rock MGrunt 2'], TemporaryBattleList['Manaphy Go-Rock MGrunt 3'], TemporaryBattleList['Manaphy Go-Rock MGrunt 4'], TemporaryBattleList['Manaphy Go-Rock FGrunt 1'], TemporaryBattleList['Manaphy Go-Rock FGrunt 2']],
+    {
+        npcs: [ManaphyGoRock, ManaphyGoRockCommander, ManaphyBoulders],
+    }
 );
 TownList['Old Chateau'] = new DungeonTown(
     'Old Chateau',
@@ -3079,7 +3309,8 @@ TownList['Old Chateau'] = new DungeonTown(
     [
         new RouteKillRequirement(10, GameConstants.Region.sinnoh, 205),
         new GymBadgeRequirement(BadgeEnums.Forest),
-    ]
+    ],
+    [TemporaryBattleList['Manaphy Go-Rock Commander']]
 );
 TownList['Team Galactic Eterna Building'] = new DungeonTown(
     'Team Galactic Eterna Building',
@@ -3485,6 +3716,13 @@ const DreamResearcher2 = new NPC('Dream Researcher', [
     requirement: new TemporaryBattleRequirement('Dream Researcher'),
 });
 
+const VitaminRefundCode = new NPC('Pokémon Breeder', [
+    'I used to have my Pokémon maxed out on Protein, but then I found out about the new Vitamins!',
+    'I swapped out some of my Proteins for the new Vitamins, but then I was left with a bunch of extra Protein I couldn\'t use.',
+    'Luckily I was able to use the code REFUND-VITAMINS to get my money back! Too bad it only has one use though...',
+    'It will also only refund Vitamins you bought after hitting the price cap.',
+]);
+
 //Unova Towns
 TownList['Aspertia City'] = new Town(
     'Aspertia City',
@@ -3702,6 +3940,7 @@ TownList['Nacrene City'] = new Town(
     [NacreneCityShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Nacrene City'])],
     {
         requirements: [new ClearDungeonRequirement(1, GameConstants.getDungeonIndex('Pinwheel Forest'))],
+        npcs: [VitaminRefundCode],
     }
 );
 TownList['Striaton City'] = new Town(
@@ -4110,6 +4349,29 @@ const LaverreFurisodeGirlKatherine = new NPC('Furisode Girl Katherine', [
     'I\'ve heard its evolutionary line loves damp conditions, and apparently if you train a Sliggoo during rainy or foggy weather something marvelous happens!',
 ], {image: 'assets/images/npcs/Furisode Girl Katherine.png'});
 
+const LaverreGengariteAster1 = new NPC('Hex Maniac Aster', [
+    'I\'m shocked... You have a Pokédex, but you still don\'t know... you really don\'t know anything about Pokémon connected to Gengar, do you?',
+    'Well then, I guess I\'ll just have to keep this wonderful item I was going to give you...',
+    'If you want to change my mind... you will have to encounter at least 666 wild Gastly, 444 wild Haunter, and 13 wild Gengar.',
+    'And do bring a Gengar of your own, won\'t you?',
+], {
+    image: 'assets/images/trainers/Hex Maniac.png',
+    requirement: new OneFromManyRequirement([
+        new StatisticRequirement(['pokemonEncountered', PokemonHelper.getPokemonByName('Gastly').id], 666, undefined, GameConstants.AchievementOption.less),
+        new StatisticRequirement(['pokemonEncountered', PokemonHelper.getPokemonByName('Haunter').id], 444, undefined, GameConstants.AchievementOption.less),
+        new StatisticRequirement(['pokemonEncountered', PokemonHelper.getPokemonByName('Gengar').id], 13, undefined, GameConstants.AchievementOption.less),
+        new ObtainedPokemonRequirement('Gengar', true)]),
+});
+
+const LaverreGengariteAster2 = new NPC('Hex Maniac Aster', [
+    'Some Pokémon evolve when exposed to a Link Cable, or sent through a trade.',
+    'That\'s right. Haunter is one of those Pokemon.',
+    'I don\'t have enough Quest Points to buy a Link Cable, but a girl named Mindy from Snowpoint City offered to trade me her Haunter for a Medicham.',
+    'Hopefully I\'ll have a Gengar soon...',
+], {image: 'assets/images/trainers/Hex Maniac.png',
+    requirement: new TemporaryBattleRequirement('Hex Maniac Aster'),
+});
+
 const AnistarKalosRoamerNPC = new RoamerNPC('Hex Maniac Melanie', [
     'The spirits tell me roaming Pokémon have been spotted on {ROUTE_NAME}!',
 ], GameConstants.Region.kalos, RoamingPokemonList.findGroup(GameConstants.Region.kalos, GameConstants.KalosSubRegions.Kalos), 'assets/images/trainers/Hex Maniac.png');
@@ -4201,7 +4463,7 @@ TownList['Parfum Palace'] = new Town(
     'Parfum Palace',
     GameConstants.Region.kalos,
     GameConstants.KalosSubRegions.Kalos,
-    [new ShardTraderShop(GameConstants.ShardTraderLocations['Parfum Palace'], 'Furfrou Shard Trader'), new GemMasterShop('Furfrou Gem Trader')],
+    [new ShardTraderShop(GameConstants.ShardTraderLocations['Parfum Palace'], 'Furfrou Shard Trader', true), new GemMasterShop('Furfrou Gem Trader')],
     {
         requirements: [new RouteKillRequirement(10, GameConstants.Region.kalos, 6)],
     }
@@ -4219,7 +4481,7 @@ TownList['Cyllage City'] = new Town(
     'Cyllage City',
     GameConstants.Region.kalos,
     GameConstants.KalosSubRegions.Kalos,
-    [CyllageCityShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Cyllage City'])],
+    [CyllageCityShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Cyllage City']), TemporaryBattleList['Marquis Grant']],
     {
         requirements: [new ClearDungeonRequirement(1, GameConstants.getDungeonIndex('Glittering Cave'))],
     }
@@ -4257,10 +4519,10 @@ TownList['Laverre City'] = new Town(
     'Laverre City',
     GameConstants.Region.kalos,
     GameConstants.KalosSubRegions.Kalos,
-    [LaverreCityShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Laverre City'])],
+    [LaverreCityShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Laverre City']), TemporaryBattleList['Hex Maniac Aster']],
     {
         requirements: [new RouteKillRequirement(10, GameConstants.Region.kalos, 14)],
-        npcs: [LaverreFurisodeGirlKatherine],
+        npcs: [LaverreFurisodeGirlKatherine, LaverreGengariteAster1, LaverreGengariteAster2],
     }
 );
 TownList['Dendemille Town'] = new Town(
@@ -4557,8 +4819,8 @@ const PaniolaTownActor = new NPC('Actor Meredith', [
     'You want to know which one can only be found on the farm? I\'m sure you can figure that out yourself. Simple process of elimination, really.',
 ], {image: 'assets/images/trainers/Actor.png'});
 const RoyalAvenueSpectator = new NPC('Spectator', [
-    'I think battles in the Battle Royal Dome are more like games of chance. But Battle Royals are nothing compared to trying to evolve an Alolan Raichu with a Thunderstone.',
-    'Evolving Pikachu or Exeggcute in Alola can result in a new form! Sometimes.',
+    'I like sneaking snacks inside the Battle Royal Dome. One time I snuck in pancakes and there were two trainers from Kanto who both had a Pikachu. I ended up sharing some with one.',
+    'Weird thing is, both trainers evolved their Pikachu after the battle, but one had a different form from usual! Maybe there\'s something about Alola that makes certain Pokémon evolve differently? I would check my Evolution Items if I were you.',
 ], {image: 'assets/images/trainers/Preschooler (female).png'});
 const KonikoniKahuna = new NPC('Kahuna Olivia', [
     'What do you mean Grand trials are just like gym battles? It\'s a totally different thing!',
@@ -4923,7 +5185,7 @@ TownList['Exeggutor Island'] = new Town(
 TownList['Altar of the Sunne and Moone'] = new Town(
     'Altar of the Sunne and Moone',
     GameConstants.Region.alola,
-    GameConstants.AlolaSubRegions.UlaulaIsland,
+    GameConstants.AlolaSubRegions.PoniIsland,
     [TemporaryBattleList.Necrozma, TemporaryBattleList['Ultra Megalopolis'], AltaroftheSunneandMooneShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Altar of the Sunne and Moone'])],
     {
         requirements: [new ClearDungeonRequirement(1, GameConstants.getDungeonIndex('Vast Poni Canyon'))],
@@ -6059,7 +6321,7 @@ TownList['Stow-on-Side'] = new Town(
     'Stow-on-Side',
     GameConstants.Region.galar,
     GameConstants.GalarSubRegions.NorthGalar,
-    [TemporaryBattleList['Rampaging Conkeldurr'], TemporaryBattleList['Rampaging Dusknoir'], GymList['Stow-on-Side1'], GymList['Stow-on-Side2'], StowonSideShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Stow-on-Side']), new ShardTraderShop(GameConstants.ShardTraderLocations['Route 6'], 'Fossil Master')],
+    [TemporaryBattleList['Rampaging Conkeldurr'], TemporaryBattleList['Rampaging Dusknoir'], GymList['Stow-on-Side1'], GymList['Stow-on-Side2'], StowonSideShop, new ShardTraderShop(GameConstants.ShardTraderLocations['Stow-on-Side']), new ShardTraderShop(GameConstants.ShardTraderLocations['Route 6'], 'Fossil Master', true, 'Fossils')],
     {
         requirements: [new RouteKillRequirement(10, GameConstants.Region.galar, 23)],
         npcs: [AncientMural1, AncientMural2, StowonSideSonia, Archaeologist],

@@ -97,7 +97,7 @@ class BreedingController {
             $('#breedingModal').modal('show');
         } else {
             Notifier.notify({
-                message: 'You do not have access to the Day Care yet.\n<i>Clear the Pewter City Gym first.</i>',
+                message: 'You do not have access to the Day Care yet.\n<i>Clear Route 3 first.</i>',
                 type: NotificationConstants.NotificationOption.warning,
             });
         }
@@ -125,20 +125,6 @@ class BreedingController {
         }
 
         return (animationType === 'almost' && egg.stepsRemaining() <= 50) ?  'hatchingSoon' : '';
-    }
-
-    public static fillHatchery() {
-        if (App.game.breeding.hasFreeQueueSlot()) {
-            const breedablePkmn = App.game.party.caughtPokemon.filter(x => x.level == 100);
-            breedablePkmn.sort((x, y) => App.game.statistics.pokemonHatched[x.id]() - App.game.statistics.pokemonHatched[y.id]());
-            let i = 0;
-            while (App.game.breeding.hasFreeQueueSlot()) {
-                if (!breedablePkmn[i].breeding) {
-                    App.game.breeding.addPokemonToHatchery(breedablePkmn[i]);
-                }
-                i++;
-            }
-        }
     }
 
     public static getEggSpots(pokemonName: PokemonNameType) {
