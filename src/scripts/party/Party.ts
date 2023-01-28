@@ -262,7 +262,7 @@ class Party implements Feature {
 
         const bonus = this.multiplier.getBonus('clickAttack', useItem);
 
-        return Math.floor(clickAttack * bonus);
+        return Math.floor(clickAttack * bonus * 2 * Math.max(App.game.badgeCase.badgeCount() / 4 , 1));
     }
 
     canAccess(): boolean {

@@ -55,6 +55,7 @@ const ViridianCityShop = new Shop([
     ItemList.Pokeball,
     ItemList.xAttack,
     ItemList.xClick,
+    ItemList.Auto_clicker,
     ItemList.Dungeon_ticket,
 ]);
 const PewterCityShop = new Shop([

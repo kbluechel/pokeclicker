@@ -16,6 +16,7 @@ enum KeyItemType {
     'DNA_splicers',
     'Reins_of_unity',
     'Pokerus_virus',
+    'Auto_clicker',
 }
 
 export default KeyItemType;
